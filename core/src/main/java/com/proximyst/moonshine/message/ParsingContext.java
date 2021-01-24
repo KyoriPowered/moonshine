@@ -16,12 +16,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package org.incendo.moonshine;
+package com.proximyst.moonshine.message;
 
-/**
- * This is the entrypoint helper class to moonshine.
- */
-public final class Moonshine {
-  private Moonshine() {
+import java.util.Map;
+
+public final class ParsingContext<R> {
+  private final Map<String, String> placeholders;
+  private final R receiver;
+
+  public ParsingContext(final Map<String, String> placeholders, final R receiver) {
+    this.placeholders = placeholders;
+    this.receiver = receiver;
+  }
+
+  public Map<String, String> placeholders() {
+    return this.placeholders;
+  }
+
+  public R receiver() {
+    return this.receiver;
   }
 }

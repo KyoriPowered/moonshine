@@ -12,7 +12,7 @@ plugins {
 }
 
 allprojects {
-    group = "org.incendo.moonshine"
+    group = "com.proximyst.moonshine"
     version = "0.1.0-SNAPSHOT"
 }
 
@@ -33,10 +33,15 @@ subprojects {
     }
 
     dependencies {
+        api("com.google.guava:guava:30.1-jre")
+        api("io.leangen.geantyref:geantyref:1.3.4")
+
         testImplementation("org.junit.jupiter:junit-jupiter:5.+")
         testImplementation("org.mockito:mockito-core:3.+")
         testImplementation("org.mockito:mockito-junit-jupiter:3.+")
         testImplementation("org.assertj:assertj-core:3.+")
+
+        testImplementation("org.apache.commons:commons-lang3:3.11")
     }
 
     tasks {
@@ -78,6 +83,7 @@ allprojects {
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = sourceCompatibility
+        disableAutoTargetJvm()
     }
 
     license {
@@ -97,6 +103,16 @@ allprojects {
 
     jacoco {
         reportsDirectory.set(rootProject.buildDir.resolve("reports").resolve("jacoco"))
+    }
+
+    tasks {
+        compileJava {
+            options.compilerArgs.add("-parameters")
+        }
+
+        compileTestJava {
+            options.compilerArgs.add("-parameters")
+        }
     }
 }
 
