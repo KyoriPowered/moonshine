@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: JDK 8
+      - name: JDK 11
         uses: actions/setup-java@v1
         with:
           java-version: 11
@@ -14,8 +14,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.gradle/caches
-          key: ${{ runner.os }}-8-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-8-gradle
+          key: ${{ runner.os }}-11-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-11-gradle
       - name: Build
         run: ./gradlew test
       - name: CodeCov
