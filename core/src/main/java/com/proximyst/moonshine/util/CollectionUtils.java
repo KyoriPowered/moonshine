@@ -37,8 +37,9 @@ public final class CollectionUtils {
     }
 
     T value = null;
-    //noinspection ForLoopReplaceableByForEach -- this is intentional
-    for (final Iterator<T> iterator = collection.iterator(); iterator.hasNext();) {
+    final Iterator<T> iterator = collection.iterator();
+    //noinspection WhileLoopReplaceableByForEach
+    while (iterator.hasNext()) {
       value = iterator.next();
     }
     return value;

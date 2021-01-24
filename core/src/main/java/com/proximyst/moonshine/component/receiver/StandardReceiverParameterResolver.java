@@ -18,10 +18,10 @@
 
 package com.proximyst.moonshine.component.receiver;
 
+import com.proximyst.moonshine.annotation.Receiver;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Optional;
-import com.proximyst.moonshine.annotation.Receiver;
 
 public final class StandardReceiverParameterResolver<R> implements IReceiverResolver<R> {
   @Override

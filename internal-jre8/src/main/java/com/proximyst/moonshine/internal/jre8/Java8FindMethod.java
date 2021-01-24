@@ -18,6 +18,7 @@
 
 package com.proximyst.moonshine.internal.jre8;
 
+import com.proximyst.moonshine.internal.IFindMethod;
 import com.proximyst.moonshine.internal.ThrowableUtils;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -25,7 +26,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import com.proximyst.moonshine.internal.IFindMethod;
 
 public final class Java8FindMethod implements IFindMethod {
   private final Map<Method, MethodHandle> methodCache = new HashMap<>();
