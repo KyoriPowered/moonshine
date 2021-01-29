@@ -5,6 +5,7 @@ import org.checkerframework.gradle.plugin.CheckerFrameworkPlugin
 plugins {
     java
     `java-library`
+    `maven-publish`
     checkstyle
     jacoco
     id("com.github.hierynomus.license") version "0.15.0"
@@ -16,11 +17,11 @@ allprojects {
     version = "0.1.0-SNAPSHOT"
 }
 
-
 subprojects {
     apply {
         plugin<JavaPlugin>()
         plugin<JavaLibraryPlugin>()
+        plugin<MavenPublishPlugin>()
         plugin<CheckstylePlugin>()
         plugin<LicensePlugin>()
         plugin<CheckerFrameworkPlugin>()
@@ -105,6 +106,11 @@ allprojects {
         reportsDirectory.set(rootProject.buildDir.resolve("reports").resolve("jacoco"))
     }
 
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
     tasks {
         compileJava {
             options.compilerArgs.add("-parameters")
@@ -112,6 +118,27 @@ allprojects {
 
         compileTestJava {
             options.compilerArgs.add("-parameters")
+        }
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                from(components["java"])
+            }
+        }
+
+        repositories {
+            maven {
+                name = "proxi-nexus"
+                url = uri("https://nexus.proximyst.com/repository/maven-any/")
+                credentials {
+                    val proxiUser: String? by project
+                    val proxiPassword: String? by project
+                    username = proxiUser
+                    password = proxiPassword
+                }
+            }
         }
     }
 }
