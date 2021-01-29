@@ -37,7 +37,7 @@ public final class Java9FindMethod implements IFindMethod {
     return this.methodCache.computeIfAbsent(method,
         methodParam -> {
           try {
-            return MethodHandles.lookup()
+            return MethodHandles.privateLookupIn(proxy.getClass(), MethodHandles.lookup())
                 .findSpecial(type,
                     method.getName(),
                     MethodType.methodType(method.getReturnType(), method.getParameterTypes()),

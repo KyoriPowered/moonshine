@@ -22,7 +22,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.proximyst.moonshine.Moonshine;
 import com.proximyst.moonshine.annotation.Flag;
-import com.proximyst.moonshine.annotation.Flags;
 import com.proximyst.moonshine.annotation.Message;
 import com.proximyst.moonshine.annotation.Placeholder;
 import com.proximyst.moonshine.component.placeholder.PlaceholderData;
@@ -95,10 +94,10 @@ public final class MessageMethod<R, M> {
     final Table<String, Class<?>, Integer> flags = HashBasedTable.create();
     for (int i = 0; i < parameters.length; i++) {
       final Parameter parameter = parameters[i];
-      final Flags flagsAnnotation = parameter.getAnnotation(Flags.class);
-      if (flagsAnnotation != null) {
-        for (final Flag flag : flagsAnnotation.value()) {
-          flags.put(flag.name(), flag.type(), i);
+      final Flag[] flagsAnnotations = parameter.getAnnotationsByType(Flag.class);
+      if (flagsAnnotations != null) {
+        for (final Flag flag : flagsAnnotations) {
+          flags.put(flag.name(), GenericTypeReflector.erase(GenericTypeReflector.box(flag.type())), i);
         }
       }
     }

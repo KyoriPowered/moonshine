@@ -27,6 +27,10 @@ import com.proximyst.moonshine.component.placeholder.IPlaceholderResolver;
 import com.proximyst.moonshine.component.placeholder.PlaceholderContext;
 import com.proximyst.moonshine.component.placeholder.PlaceholderData;
 import com.proximyst.moonshine.component.placeholder.ResolveResult;
+import com.proximyst.moonshine.component.placeholder.standard.StandardBooleanPlaceholderResolver;
+import com.proximyst.moonshine.component.placeholder.standard.StandardCharacterPlaceholderResolver;
+import com.proximyst.moonshine.component.placeholder.standard.StandardFlatNumberPlaceholderResolver;
+import com.proximyst.moonshine.component.placeholder.standard.StandardFloatingNumberPlaceholderResolver;
 import com.proximyst.moonshine.component.placeholder.standard.StandardStringPlaceholderResolver;
 import com.proximyst.moonshine.component.receiver.IReceiverResolver;
 import com.proximyst.moonshine.component.receiver.ReceiverContext;
@@ -89,13 +93,20 @@ public final class Moonshine<R, M, O> {
     this.receiverResolvers = new ArrayList<>(receiverResolvers);
     this.receiverResolvers.add(0, new StandardReceiverParameterResolver<>());
 
-    final Multimap<Class<?>, IPlaceholderResolver<R, ?>> newPlacholderResolvers = HashMultimap
+    final Multimap<Class<?>, IPlaceholderResolver<R, ?>> newPlaceholderResolvers = HashMultimap
         .create(placeholderResolvers);
     // TODO(Proximyst): Add default placeholder resolvers
-    newPlacholderResolvers.put(String.class, new StandardStringPlaceholderResolver<>());
-    newPlacholderResolvers.put(Boolean.class, new StandardStringPlaceholderResolver<>());
-    newPlacholderResolvers.put(boolean.class, new StandardStringPlaceholderResolver<>());
-    this.placeholderResolvers = newPlacholderResolvers;
+    newPlaceholderResolvers.put(String.class, new StandardStringPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Character.class, new StandardCharacterPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Boolean.class, new StandardBooleanPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Number.class, new StandardFlatNumberPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Byte.class, new StandardFlatNumberPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Short.class, new StandardFlatNumberPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Integer.class, new StandardFlatNumberPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Long.class, new StandardFlatNumberPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Float.class, new StandardFloatingNumberPlaceholderResolver<>());
+    newPlaceholderResolvers.put(Double.class, new StandardFloatingNumberPlaceholderResolver<>());
+    this.placeholderResolvers = newPlaceholderResolvers;
 
     // This has to be done after initialising the placeholders!
     for (final Method method : type.getDeclaredMethods()) {
@@ -187,7 +198,7 @@ public final class Moonshine<R, M, O> {
       do {
         resolverFlags.clear();
         for (final String flag : placeholderData.flags()) {
-          Class<?> type = GenericTypeReflector.erase(placeholderData.type().getType());
+          Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value == null ? placeholderData.type().getType() : value.getClass()));
           while (type != null) {
             final Object flagValue = flags.get(flag, type);
             if (flagValue != null) {
