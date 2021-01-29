@@ -18,10 +18,16 @@
 
 package com.proximyst.moonshine.component.placeholder;
 
+import com.proximyst.moonshine.annotation.Placeholder;
+import com.proximyst.moonshine.proxy.MessageMethod;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Data about a single placeholder on a {@link MessageMethod}.
+ */
 public final class PlaceholderData {
   private final String name;
   private final AnnotatedType type;
@@ -35,18 +41,30 @@ public final class PlaceholderData {
     this.index = index;
   }
 
+  /**
+   * @return The name of the placeholder, as provided by {@link Placeholder} or the placeholder name itself.
+   */
   public String name() {
     return this.name;
   }
 
+  /**
+   * @return The type of the placeholder, as close as possible to the actual code.
+   */
   public AnnotatedType type() {
     return this.type;
   }
 
+  /**
+   * @return The flags this placeholder can accept.
+   */
   public String[] flags() {
     return this.flags;
   }
 
+  /**
+   * @return The index this placeholder is located at in the parameters of the {@link Method}.
+   */
   public int index() {
     return this.index;
   }

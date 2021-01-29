@@ -26,13 +26,13 @@ import com.proximyst.moonshine.util.CollectionUtils;
 import java.util.Collection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class StandardFlatNumberPlaceholderResolver<N extends Number, R> implements IPlaceholderResolver<R, N> {
+public final class StandardFlatNumberPlaceholderResolver<N extends Number, R> implements IPlaceholderResolver<R, N> {
   @Override
   public ResolveResult resolve(final N value, final PlaceholderContext<R> ctx,
       final Multimap<String, @Nullable Object> flags) {
     long val = value.longValue();
     if (flags.isEmpty()) {
-      return ResolveResult.ok(Long.toString(val));
+      return ResolveResult.pass();
     }
 
     if (flags.containsEntry("positive", true)) {

@@ -21,7 +21,24 @@ package com.proximyst.moonshine.component.placeholder;
 import com.google.common.collect.Multimap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * A resolver for a placeholder of type {@code V}.
+ * <p>
+ * This must resolve to a {@link ResolveResult}.
+ *
+ * @param <R> The receiver type.
+ * @param <V> The value type to resolve into a result.
+ */
 public interface IPlaceholderResolver<R, V> {
+  /**
+   * Resolve the given value into a result to use in a message, or for further resolving. In most cases, you want to
+   * return {@link ResolveResult#ok(Object)} or {@link ResolveResult#pass()}.
+   *
+   * @param value The value to resolve with. This is never {@code null}.
+   * @param ctx   The context for this resolver.
+   * @param flags The flags provided to the resolver.
+   * @return The {@link ResolveResult} for this resolving.
+   */
   ResolveResult resolve(final V value, final PlaceholderContext<R> ctx,
       final Multimap<String, @Nullable Object> flags);
 }

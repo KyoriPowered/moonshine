@@ -24,10 +24,14 @@ import com.proximyst.moonshine.component.placeholder.PlaceholderContext;
 import com.proximyst.moonshine.component.placeholder.ResolveResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class StandardCharacterPlaceholderResolver<R> implements IPlaceholderResolver<R, Character> {
+public final class StandardCharacterPlaceholderResolver<R> implements IPlaceholderResolver<R, Character> {
   @Override
   public ResolveResult resolve(Character value, final PlaceholderContext<R> ctx,
       final Multimap<String, @Nullable Object> flags) {
+    if (flags.isEmpty()) {
+      return ResolveResult.pass();
+    }
+
     if (flags.containsEntry("uppercase", true)) {
       value = Character.toUpperCase(value);
     }

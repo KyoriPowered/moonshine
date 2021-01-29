@@ -24,13 +24,14 @@ import com.proximyst.moonshine.component.placeholder.PlaceholderContext;
 import com.proximyst.moonshine.component.placeholder.ResolveResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class StandardFloatingNumberPlaceholderResolver<N extends Number, R> implements IPlaceholderResolver<R, N> {
+public final class StandardFloatingNumberPlaceholderResolver<N extends Number, R> implements
+    IPlaceholderResolver<R, N> {
   @Override
   public ResolveResult resolve(final N value, final PlaceholderContext<R> ctx,
       final Multimap<String, @Nullable Object> flags) {
     double val = value.doubleValue();
     if (flags.isEmpty()) {
-      return ResolveResult.ok(Double.toString(val));
+      return ResolveResult.pass();
     }
 
     if (flags.containsEntry("positive", true)) {

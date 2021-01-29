@@ -21,6 +21,16 @@ package com.proximyst.moonshine.component.placeholder;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * A result of a resolving.
+ * <p>
+ * To pass on the resolving to the next resolver for the given type, return {@link #pass()}.
+ * <br> To return an error of some kind to the call, return {@link #error(Throwable)}.
+ * <br> To return a resolved value that can be passed on to the next resolver for the given type, return {@link
+ * #ok(Object)}.
+ * <br> To return a fully resolved value that may no longer be passed on any further whatsoever, return {@link
+ * #finished(String)}. This is a discouraged result, as {@link #ok(Object)} should rather be preferred.
+ */
 public abstract class ResolveResult {
   private ResolveResult() {
   }

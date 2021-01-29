@@ -95,7 +95,6 @@ public final class Moonshine<R, M, O> {
 
     final Multimap<Class<?>, IPlaceholderResolver<R, ?>> newPlaceholderResolvers = HashMultimap
         .create(placeholderResolvers);
-    // TODO(Proximyst): Add default placeholder resolvers
     newPlaceholderResolvers.put(String.class, new StandardStringPlaceholderResolver<>());
     newPlaceholderResolvers.put(Character.class, new StandardCharacterPlaceholderResolver<>());
     newPlaceholderResolvers.put(Boolean.class, new StandardBooleanPlaceholderResolver<>());
@@ -198,7 +197,7 @@ public final class Moonshine<R, M, O> {
       do {
         resolverFlags.clear();
         for (final String flag : placeholderData.flags()) {
-          Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value == null ? placeholderData.type().getType() : value.getClass()));
+          Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value.getClass()));
           while (type != null) {
             final Object flagValue = flags.get(flag, type);
             if (flagValue != null) {
@@ -238,6 +237,10 @@ public final class Moonshine<R, M, O> {
         } while (resolverIterator.hasPrevious()
             && value.getClass().isAssignableFrom(GenericTypeReflector.erase(placeholderData.type().getType()))
             && !(placeholder instanceof ResolveResult.Finished));
+
+        if (placeholder instanceof ResolveResult.Pass) {
+          placeholder = ResolveResult.ok(value);
+        }
 
         if (value == null) {
           placeholder = ResolveResult.finished(null);

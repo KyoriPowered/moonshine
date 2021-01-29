@@ -26,10 +26,14 @@ import com.proximyst.moonshine.util.CollectionUtils;
 import java.util.Collection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class StandardBooleanPlaceholderResolver<R> implements IPlaceholderResolver<R, Boolean> {
+public final class StandardBooleanPlaceholderResolver<R> implements IPlaceholderResolver<R, Boolean> {
   @Override
   public ResolveResult resolve(final Boolean value, final PlaceholderContext<R> ctx,
       final Multimap<String, @Nullable Object> flags) {
+    if (flags.isEmpty()) {
+      return ResolveResult.pass();
+    }
+
     // Unbox it to prevent many unboxes.
     boolean bool = value;
 

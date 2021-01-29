@@ -64,15 +64,25 @@ class PlaceholderTest {
         .create(TestMessages.class);
   }
 
+  @Test
+  void simple() {
+    final long placeholder = new Random().nextLong();
+
+    this.testMessages.simple("receiver", placeholder);
+
+    verify(this.messageSource).message("simpleplaceholder");
+    verify(this.messageSender).sendMessage("receiver", "abc " + placeholder);
+  }
+
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
-  void simplePlaceholder(final boolean uppercase) {
+  void flags(final boolean uppercase) {
     // Ensure the placeholder has a little of both cases first.
     final String placeholder = RandomStringUtils.randomAlphabetic(8).toLowerCase()
         + RandomStringUtils.randomAlphabetic(8).toUpperCase();
     final String expected = uppercase ? placeholder.toUpperCase() : placeholder;
 
-    this.testMessages.test("testreceiver", placeholder, uppercase);
+    this.testMessages.flagged("testreceiver", placeholder, uppercase);
 
     verify(this.messageSource).message("flaggedplaceholder");
     verify(this.messageSender).sendMessage("testreceiver", "abc " + expected);
@@ -124,8 +134,12 @@ class PlaceholderTest {
   }
 
   interface TestMessages {
+    @Message("simpleplaceholder")
+    void simple(final @Receiver Object receiver,
+        @Placeholder final Long placeholder);
+
     @Message("flaggedplaceholder")
-    void test(final @Receiver Object receiver,
+    void flagged(final @Receiver Object receiver,
 
         @Placeholder(flags = "uppercase") final String placeholder,
 

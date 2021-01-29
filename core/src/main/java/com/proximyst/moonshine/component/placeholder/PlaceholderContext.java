@@ -18,9 +18,15 @@
 
 package com.proximyst.moonshine.component.placeholder;
 
+import com.google.common.collect.Multimap;
 import java.lang.reflect.Method;
 
-public class PlaceholderContext<R> {
+/**
+ * A context for a run of {@link IPlaceholderResolver#resolve(Object, PlaceholderContext, Multimap)}.
+ *
+ * @param <R> The receiver type for the {@link IPlaceholderResolver}.
+ */
+public final class PlaceholderContext<R> {
   private final Method method;
   private final Object proxy;
   private final Object[] parameters;
@@ -34,18 +40,30 @@ public class PlaceholderContext<R> {
     this.receiver = receiver;
   }
 
+  /**
+   * @return The {@link Method} called on the {@link #proxy()}.
+   */
   public Method method() {
     return this.method;
   }
 
+  /**
+   * @return The proxy instance of the messaging interface.
+   */
   public Object proxy() {
     return this.proxy;
   }
 
+  /**
+   * @return The parameters provided to the {@link #method()}.
+   */
   public Object[] parameters() {
     return this.parameters;
   }
 
+  /**
+   * @return The receiver of type {@code R} resolved for this call.
+   */
   public R receiver() {
     return this.receiver;
   }
