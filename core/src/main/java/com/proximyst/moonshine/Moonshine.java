@@ -166,6 +166,9 @@ public final class Moonshine<R, M, O> {
     final R receiver = messageMethod.receiverLocator().find(new ReceiverContext(method, proxy, args));
 
     final O rawMessage = this.messageSource.message(messageMethod.messageKey());
+    if (rawMessage == null) {
+      throw new IllegalStateException("No message for key " + messageMethod.messageKey());
+    }
 
     final Table<String, Class<?>, Object> flags = HashBasedTable.create();
     for (final Cell<String, Class<?>, Integer> cell : messageMethod.flags().cellSet()) {

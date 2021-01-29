@@ -18,28 +18,25 @@
 
 package com.proximyst.moonshine.test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.proximyst.moonshine.Moonshine;
-import com.proximyst.moonshine.annotation.Flag;
 import com.proximyst.moonshine.annotation.Message;
-import com.proximyst.moonshine.annotation.Placeholder;
 import com.proximyst.moonshine.annotation.Receiver;
 import com.proximyst.moonshine.message.IMessageParser;
 import com.proximyst.moonshine.message.IMessageSender;
 import com.proximyst.moonshine.message.IMessageSource;
 import com.proximyst.moonshine.util.StringReplaceMessageParser;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class PlaceholderTest {
+class SimpleMessageTest {
   private static final IMessageParser<String, String, String> MESSAGE_PARSER = new StringReplaceMessageParser<>();
 
   @Mock
@@ -48,35 +45,35 @@ class PlaceholderTest {
   @Mock
   private IMessageSender<String, String> messageSender;
 
-  @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  void simplePlaceholder(final boolean uppercase) {
-    when(this.messageSource.message(any())).thenReturn("abc %placeholder%");
+  @Test
+  void validMessage() {
+    final String message = "Cool, simple message";
+    when(this.messageSource.message(any())).thenReturn(message);
     final TestMessages testMessages = Moonshine.<String>builder()
         .source(this.messageSource)
         .parser(MESSAGE_PARSER)
         .sender(this.messageSender)
         .create(TestMessages.class);
 
-    // Ensure the placeholder has a little of both cases first.
-    final String placeholder = RandomStringUtils.randomAlphabetic(8).toLowerCase()
-        + RandomStringUtils.randomAlphabetic(8).toUpperCase();
-    final String expected = uppercase ? placeholder.toUpperCase() : placeholder;
+    testMessages.test("receiver");
 
-    testMessages.test("testreceiver", placeholder, uppercase);
+    verify(this.messageSource).message("message");
+    verify(this.messageSender).sendMessage("receiver", message);
+  }
 
-    verify(this.messageSource).message("flaggedplaceholder");
-    verify(this.messageSender).sendMessage("testreceiver", "abc " + expected);
+  @Test
+  void invalidMessage() {
+    final TestMessages testMessages = Moonshine.<String>builder()
+        .source(this.messageSource)
+        .parser(MESSAGE_PARSER)
+        .sender(this.messageSender)
+        .create(TestMessages.class);
+    assertThatThrownBy(() -> testMessages.test("receiver"))
+        .isInstanceOf(IllegalStateException.class);
   }
 
   interface TestMessages {
-    @Message("flaggedplaceholder")
-    void test(final @Receiver Object receiver,
-
-        @Placeholder(flags = "uppercase")
-            String placeholder,
-
-        @Flag(type = String.class, name = "uppercase")
-        @Flag(type = boolean.class, name = "cool") final boolean toUpperCase);
+    @Message("message")
+    void test(final @Receiver Object receiver);
   }
 }
