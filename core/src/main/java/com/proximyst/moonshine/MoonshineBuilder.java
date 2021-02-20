@@ -61,18 +61,18 @@ public class MoonshineBuilder<B, R> {
     }
 
     @SideEffectFree
-    public <O> Sourced<R, O> source(final IMessageSource<O> messageSource) {
+    public <O> Sourced<R, O> source(final IMessageSource<O, R> messageSource) {
       return new Sourced<>(this.placeholderResolvers, this.receivers, messageSource);
     }
   }
 
   public static final class Sourced<R, O> extends MoonshineBuilder<Sourced<O, R>, R> {
     private final List<IReceiverResolver<R>> receivers;
-    private final IMessageSource<O> messageSource;
+    private final IMessageSource<O, R> messageSource;
 
     private Sourced(final Multimap<Class<?>, IPlaceholderResolver<R, ?>> placeholderResolvers,
         final List<IReceiverResolver<R>> receivers,
-        final IMessageSource<O> messageSource) {
+        final IMessageSource<O, R> messageSource) {
       super(placeholderResolvers);
       this.receivers = receivers;
       this.messageSource = messageSource;
@@ -91,12 +91,12 @@ public class MoonshineBuilder<B, R> {
 
   public static final class Parsed<R, O, M> extends MoonshineBuilder<Parsed<R, O, M>, R> {
     private final List<IReceiverResolver<R>> receivers;
-    private final IMessageSource<O> messageSource;
+    private final IMessageSource<O, R> messageSource;
     private final IMessageParser<O, M, R> messageParser;
 
     private Parsed(final Multimap<Class<?>, IPlaceholderResolver<R, ?>> placeholderResolvers,
         final List<IReceiverResolver<R>> receivers,
-        final IMessageSource<O> messageSource,
+        final IMessageSource<O, R> messageSource,
         final IMessageParser<O, M, R> messageParser) {
       super(placeholderResolvers);
       this.receivers = receivers;
@@ -121,13 +121,13 @@ public class MoonshineBuilder<B, R> {
 
   public static final class Sender<R, O, M> extends MoonshineBuilder<Sender<R, O, M>, R> {
     private final List<IReceiverResolver<R>> receivers;
-    private final IMessageSource<O> messageSource;
+    private final IMessageSource<O, R> messageSource;
     private final IMessageParser<O, M, R> messageParser;
     private final IMessageSender<R, M> messageSender;
 
     private Sender(final Multimap<Class<?>, IPlaceholderResolver<R, ?>> placeholderResolvers,
         final List<IReceiverResolver<R>> receivers,
-        final IMessageSource<O> messageSource,
+        final IMessageSource<O, R> messageSource,
         final IMessageParser<O, M, R> messageParser,
         final IMessageSender<R, M> messageSender) {
       super(placeholderResolvers);

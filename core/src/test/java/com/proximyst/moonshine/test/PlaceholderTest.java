@@ -47,7 +47,7 @@ class PlaceholderTest {
   private static final IMessageParser<String, String, String> MESSAGE_PARSER = new StringReplaceMessageParser<>();
 
   @Mock
-  private IMessageSource<String> messageSource;
+  private IMessageSource<String, String> messageSource;
 
   @Mock
   private IMessageSender<String, String> messageSender;
@@ -56,7 +56,7 @@ class PlaceholderTest {
 
   @BeforeEach
   void setUp() {
-    when(this.messageSource.message(any())).thenReturn(MESSAGE);
+    when(this.messageSource.message(any(), any())).thenReturn(MESSAGE);
     this.testMessages = Moonshine.<String>builder()
         .source(this.messageSource)
         .parser(MESSAGE_PARSER)
@@ -70,7 +70,7 @@ class PlaceholderTest {
 
     this.testMessages.simple("receiver", placeholder);
 
-    verify(this.messageSource).message("simpleplaceholder");
+    verify(this.messageSource).message("simpleplaceholder", "receiver");
     verify(this.messageSender).sendMessage("receiver", "abc " + placeholder);
   }
 
@@ -84,7 +84,7 @@ class PlaceholderTest {
 
     this.testMessages.flagged("testreceiver", placeholder, uppercase);
 
-    verify(this.messageSource).message("flaggedplaceholder");
+    verify(this.messageSource).message("flaggedplaceholder", "testreceiver");
     verify(this.messageSender).sendMessage("testreceiver", "abc " + expected);
   }
 
@@ -93,7 +93,7 @@ class PlaceholderTest {
     final short num = (short) (new Random().nextInt() % Short.MAX_VALUE);
     this.testMessages.flatNumber("receiver", num, false, false, false);
 
-    verify(this.messageSource).message("number");
+    verify(this.messageSource).message("number", "receiver");
     verify(this.messageSender).sendMessage("receiver", "abc " + num);
   }
 
@@ -102,7 +102,7 @@ class PlaceholderTest {
     final long num = new Random().nextLong();
     this.testMessages.flatNumber("receiver", num, true, false, true);
 
-    verify(this.messageSource).message("number");
+    verify(this.messageSource).message("number", "receiver");
     verify(this.messageSender).sendMessage("receiver", "abc " + Long.toHexString(-num));
   }
 
@@ -111,7 +111,7 @@ class PlaceholderTest {
     final int num = new Random().nextInt();
     this.testMessages.flatNumber("receiver", num, false, true, false);
 
-    verify(this.messageSource).message("number");
+    verify(this.messageSource).message("number", "receiver");
     verify(this.messageSender).sendMessage("receiver", "abc " + Long.toOctalString(num));
   }
 
@@ -120,7 +120,7 @@ class PlaceholderTest {
     final float num = new Random().nextFloat();
     this.testMessages.floatingNumber("receiver", num, false, true);
 
-    verify(this.messageSource).message("number");
+    verify(this.messageSource).message("number", "receiver");
     verify(this.messageSender).sendMessage("receiver", "abc " + Double.toString(-num));
   }
 
@@ -129,7 +129,7 @@ class PlaceholderTest {
     final double num = new Random().nextDouble();
     this.testMessages.floatingNumber("receiver", num, true, false);
 
-    verify(this.messageSource).message("number");
+    verify(this.messageSource).message("number", "receiver");
     verify(this.messageSender).sendMessage("receiver", "abc " + Double.toHexString(num));
   }
 

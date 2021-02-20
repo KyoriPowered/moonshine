@@ -42,7 +42,7 @@ class UnscannableMethodTest {
   private IMessageSender<Object, Object> messageSender;
 
   @Mock
-  private IMessageSource<Object> messageSource;
+  private IMessageSource<Object, Object> messageSource;
 
   @Test
   void noMessageKey() {

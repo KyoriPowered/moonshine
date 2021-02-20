@@ -26,15 +26,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class StandardStringPlaceholderResolver<R> implements IPlaceholderResolver<R, String> {
   @Override
-  public ResolveResult resolve(String value, final PlaceholderContext<R> ctx,
-      final Multimap<String, @Nullable Object> flags) {
+  public ResolveResult resolve(final String placeholderName, String value,
+      final PlaceholderContext<R> ctx, final Multimap<String, @Nullable Object> flags) {
     if (flags.isEmpty()) {
       return ResolveResult.pass();
     }
 
     if (value.isEmpty()) {
       if (flags.containsEntry("null-if-empty", true)) {
-        return ResolveResult.finished(null);
+        return ResolveResult.ok(placeholderName, "null");
       }
 
       return ResolveResult.pass();
@@ -42,11 +42,11 @@ public final class StandardStringPlaceholderResolver<R> implements IPlaceholderR
 
     if (value.trim().isEmpty()) {
       if (flags.containsEntry("null-if-blank", true)) {
-        return ResolveResult.finished(null);
+        return ResolveResult.ok(placeholderName, "null");
       }
 
       if (flags.containsEntry("empty-if-blank", true)) {
-        return ResolveResult.ok("");
+        return ResolveResult.finished(placeholderName, "");
       }
 
       return ResolveResult.pass();
@@ -68,6 +68,6 @@ public final class StandardStringPlaceholderResolver<R> implements IPlaceholderR
       }
     }
 
-    return ResolveResult.ok(value);
+    return ResolveResult.finished(placeholderName, value);
   }
 }

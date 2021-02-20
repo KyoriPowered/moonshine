@@ -40,7 +40,7 @@ class SimpleMessageTest {
   private static final IMessageParser<String, String, String> MESSAGE_PARSER = new StringReplaceMessageParser<>();
 
   @Mock
-  private IMessageSource<String> messageSource;
+  private IMessageSource<String, String> messageSource;
 
   @Mock
   private IMessageSender<String, String> messageSender;
@@ -48,7 +48,7 @@ class SimpleMessageTest {
   @Test
   void validMessage() {
     final String message = "Cool, simple message";
-    when(this.messageSource.message(any())).thenReturn(message);
+    when(this.messageSource.message(any(), any())).thenReturn(message);
     final TestMessages testMessages = Moonshine.<String>builder()
         .source(this.messageSource)
         .parser(MESSAGE_PARSER)
@@ -57,7 +57,7 @@ class SimpleMessageTest {
 
     testMessages.test("receiver");
 
-    verify(this.messageSource).message("message");
+    verify(this.messageSource).message("message", "receiver");
     verify(this.messageSender).sendMessage("receiver", message);
   }
 

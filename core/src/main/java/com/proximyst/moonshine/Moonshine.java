@@ -20,6 +20,8 @@ package com.proximyst.moonshine;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
@@ -35,7 +37,7 @@ import com.proximyst.moonshine.component.placeholder.standard.StandardStringPlac
 import com.proximyst.moonshine.component.receiver.IReceiverResolver;
 import com.proximyst.moonshine.component.receiver.ReceiverContext;
 import com.proximyst.moonshine.component.receiver.StandardReceiverParameterResolver;
-import com.proximyst.moonshine.exception.UnresolvablePlaceholderException;
+import com.proximyst.moonshine.exception.PlaceholderResolvingErrorResultException;
 import com.proximyst.moonshine.internal.IFindMethod;
 import com.proximyst.moonshine.internal.ThrowableUtils;
 import com.proximyst.moonshine.internal.jre8.Java8FindMethod;
@@ -59,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
@@ -75,12 +78,12 @@ public final class Moonshine<R, M, O> {
   private final Map<Method, MessageMethod<R, O>> messageMethods = new HashMap<>();
   private final Multimap<Class<?>, IPlaceholderResolver<R, ?>> placeholderResolvers;
   private final List<IReceiverResolver<R>> receiverResolvers;
-  private final IMessageSource<O> messageSource;
+  private final IMessageSource<O, R> messageSource;
   private final IMessageParser<O, M, R> messageParser;
   private final IMessageSender<R, M> messageSender;
 
   Moonshine(final Class<?> type,
-      final IMessageSource<O> messageSource,
+      final IMessageSource<O, R> messageSource,
       final IMessageParser<O, M, R> messageParser,
       final IMessageSender<R, M> messageSender,
       final List<IReceiverResolver<R>> receiverResolvers,
@@ -137,11 +140,101 @@ public final class Moonshine<R, M, O> {
     return this.receiverResolvers;
   }
 
+  private Map<String, String> resolvePlaceholder(final PlaceholderContext<R> placeholderContext,
+      final Table<String, Class<?>, Object> flags, final Multimap<String, Object> resolverFlags,
+      final String placeholderName, final Object value, final PlaceholderData placeholderData) {
+    // First we have to collect the applicable flags for the current placeholder value type.
+    // We do this by leveraging the provided multi-map, as clearing is faster than allocating.
+    resolverFlags.clear();
+    for (final String flag : placeholderData.flags()) {
+      Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value.getClass()));
+      while (type != null) {
+        final Object flagValue = flags.get(flag, type);
+        if (flagValue != null) {
+          resolverFlags.put(flag, flagValue == EmptyCell.INSTANCE ? null : flagValue);
+        }
+        type = type.getSuperclass();
+      }
+    }
+
+    // Now we need to actually resolve the placeholder, and re-resolve any new re-resolvable results.
+    // To do this, we require the resolvers of this type:
+    final Class<?> valueType = value.getClass();
+    final List<IPlaceholderResolver<R, ?>> placeholderResolvers = CollectionUtils
+        .asList(this.resolversFor(valueType));
+    final ListIterator<IPlaceholderResolver<R, ?>> resolverIterator = placeholderResolvers
+        .listIterator(placeholderResolvers.size());
+
+    ResolveResult result;
+    try {
+      do {
+        result = ((IPlaceholderResolver<R, Object>) resolverIterator.previous())
+            .resolve(placeholderName, value, placeholderContext, resolverFlags);
+      } while (result instanceof ResolveResult.Pass && resolverIterator.hasPrevious());
+    } catch (final Throwable throwable) {
+      // We should never swallow Errors; this is specified in its javadoc.
+      if (throwable instanceof Error) {
+        // Let's throw up to respect the documented behaviour of Errors.
+        throw throwable;
+      }
+
+      result = ResolveResult.error(throwable);
+    }
+
+    if (result instanceof ResolveResult.Pass) {
+      // We've hit the end of resolvers, therefore we have nothing special to set the placeholder as.
+      if (value instanceof String) {
+        return ImmutableMap.of(placeholderName, String.valueOf(value));
+      } else {
+        result = ResolveResult.ok(placeholderName, String.valueOf(value));
+      }
+    }
+
+    if (result instanceof ResolveResult.Finished) {
+      return Maps.transformValues(((ResolveResult.Finished) result).items(), String::valueOf);
+    }
+
+    if (result instanceof ResolveResult.Error) {
+      final Throwable throwable = ((ResolveResult.Error) result).throwable();
+      if (throwable instanceof Error // Errors must always be rethrown.
+          || throwable instanceof RuntimeException // Unchecked exception, doesn't need to be "able" to throw this.
+          || ReflectionUtils.canThrow(placeholderContext.method(), throwable.getClass())) {
+        ThrowableUtils.sneakyThrow(throwable);
+        throw new RuntimeException(throwable);
+      }
+
+      throw new PlaceholderResolvingErrorResultException(throwable);
+    }
+
+    // Result must now be Ok.
+    // To be 100% sure, let's just ensure this is the case as we don't have sealed classes (yet!).
+    if (!(result instanceof ResolveResult.Ok)) {
+      throw new IllegalStateException("Result is not Ok; open an issue at https://github.com/Proximyst/moonshine");
+    }
+
+    final Map<String, Object> items = new HashMap<>(((ResolveResult.Ok) result).items());
+    if (items.isEmpty()) {
+      return ImmutableMap.of();
+    }
+
+    for (final Entry<String, Object> entry : items.entrySet()) {
+      final Map<String, String> resolved = this.resolvePlaceholder(placeholderContext, flags,
+          resolverFlags, entry.getKey(), entry.getValue(), placeholderData);
+      items.putAll(resolved);
+    }
+
+    return Maps.transformValues(items, String::valueOf);
+  }
+
   @Nullable Object proxyInvocation(final Object proxy, final Method method, Object @Nullable [] args) {
     if (args == null) {
+      // We should not allocate an extra array for most usages, and we cannot
+      // accept null arguments.
       args = EMPTY_ARRAY;
     }
 
+    // Ensure this is not one of the "default" methods on Object.
+    // We will just pretend the proxy is this class; we don't care much about the proxy itself.
     if (ReflectionUtils.isEqualsMethod(method)) {
       return args.length == 1 && proxy == args[0];
     }
@@ -152,6 +245,8 @@ public final class Moonshine<R, M, O> {
       return this.type.getName() + "@" + this.hashCode();
     }
 
+    // Is this method a default interface method?
+    // We will need to call it like usual in that case, as it has an actual implementation.
     if (method.isDefault()) {
       try {
         final MethodHandle handle = FIND_METHOD_UTIL.findMethod(method, proxy);
@@ -168,92 +263,50 @@ public final class Moonshine<R, M, O> {
       }
     }
 
+    // Get the method data of the called method.
+    // This contains information on how to proceed.
     final MessageMethod<R, O> messageMethod = this.messageMethods.get(method);
     if (messageMethod == null) {
+      // TODO(Mariell Hoversholm): Is invalid state such as this possible?
+      //   Investigate the possibility of such an occurrence.
       throw new IllegalStateException("unknown message method: " + ReflectionUtils.formatMethod(method));
     }
 
+    // The receiver locator should already exist for this method.
+    // If there is valid receiver, this should already be handled upon method scanning.
+    // The receiver is therefore always valid, however not necessarily non-null.
     final R receiver = messageMethod.receiverLocator().find(new ReceiverContext(method, proxy, args));
 
-    final O rawMessage = this.messageSource.message(messageMethod.messageKey());
+    // Get the raw message from the message source.
+    final O rawMessage = this.messageSource.message(messageMethod.messageKey(), receiver);
     if (rawMessage == null) {
       throw new IllegalStateException("No message for key " + messageMethod.messageKey());
     }
 
+    // We need to find all the available flags on this specific method.
+    // We know that the flag indices are going to be within bounds, because they
+    //   are directly from the scanned method; it would be invalid state to be
+    //   out of bounds here.
     final Table<String, Class<?>, Object> flags = HashBasedTable.create();
     for (final Cell<String, Class<?>, Integer> cell : messageMethod.flags().cellSet()) {
-      final Object value = args[cell.getValue()];
+      final Object value = args[Objects.requireNonNull(cell.getValue())];
       flags.put(Objects.requireNonNull(cell.getRowKey()),
           Objects.requireNonNull(cell.getColumnKey()),
           value == null ? EmptyCell.INSTANCE : value);
     }
 
+    // The placeholder context is used to convey information to the resolvers
+    //   in an ABI-safe way.
     final PlaceholderContext<R> placeholderContext = new PlaceholderContext<>(method, proxy, args, receiver);
+
+    // Store all final placeholders in here.
     final Map<String, String> placeholders = new HashMap<>();
+
     final Multimap<String, Object> resolverFlags = HashMultimap.create();
     for (final PlaceholderData placeholderData : messageMethod.placeholders()) {
-      Object value = args[placeholderData.index()];
-      ResolveResult placeholder;
-      do {
-        resolverFlags.clear();
-        for (final String flag : placeholderData.flags()) {
-          Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value.getClass()));
-          while (type != null) {
-            final Object flagValue = flags.get(flag, type);
-            if (flagValue != null) {
-              resolverFlags.put(flag, flagValue == EmptyCell.INSTANCE ? null : flagValue);
-            }
-            type = type.getSuperclass();
-          }
-        }
-
-        final Class<?> valueType = value.getClass();
-        final List<IPlaceholderResolver<R, ?>> placeholderResolvers = CollectionUtils
-            .asList(this.resolversFor(valueType));
-        final ListIterator<IPlaceholderResolver<R, ?>> resolverIterator = placeholderResolvers
-            .listIterator(placeholderResolvers.size());
-        do {
-          try {
-            placeholder = ((IPlaceholderResolver<R, Object>) resolverIterator.previous())
-                .resolve(value, placeholderContext, resolverFlags);
-          } catch (final Throwable throwable) {
-            if (throwable instanceof Error) {
-              throw throwable;
-            }
-
-            placeholder = ResolveResult.error(throwable);
-          }
-
-          if (placeholder instanceof ResolveResult.Error) {
-            throw new UnresolvablePlaceholderException("Placeholder " + placeholderData.name()
-                + " of " + ReflectionUtils.formatMethod(method)
-                + " cannot be resolved",
-                ((ResolveResult.Error) placeholder).throwable());
-          }
-
-          if (placeholder instanceof ResolveResult.Ok) {
-            value = ((ResolveResult.Ok) placeholder).item();
-          }
-        } while (resolverIterator.hasPrevious()
-            && value.getClass().isAssignableFrom(GenericTypeReflector.erase(placeholderData.type().getType()))
-            && !(placeholder instanceof ResolveResult.Finished));
-
-        if (placeholder instanceof ResolveResult.Pass) {
-          placeholder = ResolveResult.ok(value);
-        }
-
-        if (value == null) {
-          placeholder = ResolveResult.finished(null);
-          break;
-        }
-
-        if (placeholder instanceof ResolveResult.Ok && value.getClass().isAssignableFrom(valueType)) {
-          placeholder = ResolveResult.finished(String.valueOf(value));
-          break;
-        }
-      } while (!(placeholder instanceof ResolveResult.Finished));
-
-      placeholders.put(placeholderData.name(), String.valueOf(((ResolveResult.Finished) placeholder).item()));
+      final Object value = args[placeholderData.index()];
+      placeholders.putAll(this.resolvePlaceholder(placeholderContext, flags, resolverFlags,
+          placeholderData.name(), value, placeholderData));
     }
 
     final ParsingContext<R> parsingContext = new ParsingContext<>(placeholders, receiver);

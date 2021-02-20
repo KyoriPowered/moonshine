@@ -26,8 +26,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class StandardCharacterPlaceholderResolver<R> implements IPlaceholderResolver<R, Character> {
   @Override
-  public ResolveResult resolve(Character value, final PlaceholderContext<R> ctx,
-      final Multimap<String, @Nullable Object> flags) {
+  public ResolveResult resolve(final String placeholderName, Character value,
+      final PlaceholderContext<R> ctx, final Multimap<String, @Nullable Object> flags) {
     if (flags.isEmpty()) {
       return ResolveResult.pass();
     }
@@ -40,6 +40,6 @@ public final class StandardCharacterPlaceholderResolver<R> implements IPlacehold
       value = Character.toLowerCase(value);
     }
 
-    return ResolveResult.ok(value);
+    return ResolveResult.ok(placeholderName, String.valueOf(value));
   }
 }

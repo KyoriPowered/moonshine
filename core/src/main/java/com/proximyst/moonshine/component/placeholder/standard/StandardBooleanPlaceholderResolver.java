@@ -28,33 +28,30 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class StandardBooleanPlaceholderResolver<R> implements IPlaceholderResolver<R, Boolean> {
   @Override
-  public ResolveResult resolve(final Boolean value, final PlaceholderContext<R> ctx,
-      final Multimap<String, @Nullable Object> flags) {
+  public ResolveResult resolve(final String placeholderName, Boolean value,
+      final PlaceholderContext<R> ctx, final Multimap<String, @Nullable Object> flags) {
     if (flags.isEmpty()) {
       return ResolveResult.pass();
     }
 
-    // Unbox it to prevent many unboxes.
-    boolean bool = value;
-
     if (flags.containsEntry("negate", true)) {
-      bool = !bool;
+      value = !value;
     }
 
-    if (bool) {
+    if (value) {
       final Collection<@Nullable Object> nameTrue = flags.get("true-name");
       final Object name = CollectionUtils.last(nameTrue);
       if (name != null) {
-        return ResolveResult.ok(name);
+        return ResolveResult.ok(placeholderName, name);
       }
     } else {
       final Collection<@Nullable Object> nameFalse = flags.get("false-name");
       final Object name = CollectionUtils.last(nameFalse);
       if (name != null) {
-        return ResolveResult.ok(name);
+        return ResolveResult.ok(placeholderName, name);
       }
     }
 
-    return ResolveResult.ok(bool);
+    return ResolveResult.ok(placeholderName, String.valueOf(value));
   }
 }
