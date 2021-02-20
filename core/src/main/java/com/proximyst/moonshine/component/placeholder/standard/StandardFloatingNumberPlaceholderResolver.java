@@ -27,8 +27,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class StandardFloatingNumberPlaceholderResolver<N extends Number, R> implements
     IPlaceholderResolver<R, N> {
   @Override
-  public ResolveResult resolve(final N value, final PlaceholderContext<R> ctx,
-      final Multimap<String, @Nullable Object> flags) {
+  public ResolveResult resolve(final String placeholderName, final N value,
+      final PlaceholderContext<R> ctx, final Multimap<String, @Nullable Object> flags) {
     double val = value.doubleValue();
     if (flags.isEmpty()) {
       return ResolveResult.pass();
@@ -47,13 +47,13 @@ public final class StandardFloatingNumberPlaceholderResolver<N extends Number, R
     }
 
     if (flags.containsEntry("binary", true)) {
-      return ResolveResult.ok(Long.toBinaryString(Double.doubleToLongBits(val)));
+      return ResolveResult.ok(placeholderName, Long.toBinaryString(Double.doubleToLongBits(val)));
     }
 
     if (flags.containsEntry("hexadecimal", true) || flags.containsEntry("hex", true)) {
-      return ResolveResult.ok(Double.toHexString(val));
+      return ResolveResult.ok(placeholderName, Double.toHexString(val));
     }
 
-    return ResolveResult.ok(Double.toString(val));
+    return ResolveResult.ok(placeholderName, Double.toString(val));
   }
 }

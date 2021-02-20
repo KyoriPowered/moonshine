@@ -16,24 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package com.proximyst.moonshine.message;
+package com.proximyst.moonshine.exception;
 
-public interface IMessageSource<T, R> {
-  /**
-   * Fetch a message from the source of messages.
-   * <p>
-   * There are no implementation detail guarantees on this. It may use any kind of underlying types the implementer
-   * wants.
-   * </p>
-   * <p>
-   * <b>Note:</b> This should support keys with {@code .}s (full-stops) in them, as this is the standard of all message
-   * keys.
-   * <br>
-   * <b>Note:</b> This must never fail. There must always be a message for a given key, even if this message is just an
-   * unimplemented warning.
-   * </p>
-   *
-   * @return the message from the source.
-   */
-  T message(final String key, final R receiver);
+public final class PlaceholderResolvingErrorResultException extends MoonshineException{
+  public PlaceholderResolvingErrorResultException(final Throwable cause) {
+    super("Exception occurred while resolving placeholders", cause);
+  }
 }

@@ -29,6 +29,12 @@ public final class ReflectionUtils {
   private ReflectionUtils() {
   }
 
+  /**
+   * Formats a method to a human-readable and machine-readable string.
+   *
+   * @param method The method to format.
+   * @return The method in a string of {@code declaring.package.ClassName#methodName(int,String,ParameterType<Generic>)ReturnType<Generic>}.
+   */
   public static String formatMethod(final Method method) {
     final String declaring = method.getDeclaringClass().getName();
     final String name = method.getName();
@@ -65,5 +71,15 @@ public final class ReflectionUtils {
     return method.getName().equals("toString")
         && method.getParameterCount() == 0
         && method.getReturnType() == String.class;
+  }
+
+  public static boolean canThrow(final Method method, final Class<? extends Throwable> type) {
+    for (final Class<?> declared : method.getExceptionTypes()) {
+      if (declared == type || declared.isAssignableFrom(type)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

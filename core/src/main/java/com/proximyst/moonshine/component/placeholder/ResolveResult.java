@@ -18,37 +18,88 @@
 
 package com.proximyst.moonshine.component.placeholder;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A result of a resolving.
  * <p>
  * To pass on the resolving to the next resolver for the given type, return {@link #pass()}.
  * <br> To return an error of some kind to the call, return {@link #error(Throwable)}.
- * <br> To return a resolved value that can be passed on to the next resolver for the given type, return {@link
- * #ok(Object)}.
- * <br> To return a fully resolved value that may no longer be passed on any further whatsoever, return {@link
- * #finished(String)}. This is a discouraged result, as {@link #ok(Object)} should rather be preferred.
+ * <br> To return resolved values that can be passed on to the next resolver for the given types, return {@link
+ * #ok(Map)}.
+ * <br> To return fully resolved values that may no longer be passed on any further whatsoever, return {@link
+ * #finished(Map)}. This is a discouraged result, as {@link #ok(Map)} should rather be preferred.
  */
 public abstract class ResolveResult {
   private ResolveResult() {
   }
 
+  /**
+   * Pass to the next placeholder resolver in this chain.
+   * <p>
+   * This does not permanently disregard the current resolver: it only moves on until it moves to another type, then
+   * back.
+   *
+   * @return The {@link Pass} instance, indicating that the next resolver should handle the current value.
+   */
   public static Pass pass() {
     return Pass.INSTANCE;
   }
 
+  /**
+   * Creates a new {@link Error}, terminating the resolving and execution with an error.
+   * <p>
+   * This is thrown from the interface method to the caller.
+   *
+   * @param throwable The error to throw to the caller.
+   * @return A new {@link Error} instance with the given {@link Throwable} as the thrown exception.
+   */
   public static Error error(final Throwable throwable) {
     return new Error(throwable);
   }
 
-  public static Ok ok(final Object item) {
-    return new Ok(item);
+  /**
+   * Passes the named {@link Object}s on for another iteration of placeholder resolvers.
+   *
+   * @param items The items to pass on to the next iteration. This and its values cannot be {@code null}.
+   * @return The {@link Ok} instance, indicating that it should not terminate.
+   */
+  public static Ok ok(final Map<String, Object> items) {
+    return new Ok(items);
   }
 
-  public static Finished finished(final @Nullable String item) {
-    return new Finished(item);
+  /**
+   * Passes the named {@link Object} on for another iteration of placeholder resolvers.
+   *
+   * @param name  The name of the object. This cannot be {@code null}.
+   * @param value The value of the object. This cannot be {@code null}.
+   * @return The {@link Ok} instance, indicating that it should not terminate.
+   */
+  public static Ok ok(final String name, final Object value) {
+    return ok(ImmutableMap.of(name, value));
+  }
+
+  /**
+   * Accepts the {@link Object}s as the final placeholders for this resolver, terminating the resolving.
+   *
+   * @param items The items to accept as the final placeholders. This and its values cannot be {@code null}.
+   * @return The {@link Finished} instance, indicating that it should terminate.
+   */
+  public static Finished finished(final Map<String, Object> items) {
+    return new Finished(items);
+  }
+
+  /**
+   * Accepts the {@link Object} as the final placeholder for this resolver, terminating the resolving.
+   *
+   * @param name  The name of the object. This cannot be {@code null}.
+   * @param value The value of the object. This cannot be {@code null}.
+   * @return The {@link Finished} instance, indicating that it should terminate.
+   */
+  public static Finished finished(final String name, final Object value) {
+    return finished(ImmutableMap.of(name, value));
   }
 
   public static final class Pass extends ResolveResult {
@@ -103,14 +154,14 @@ public abstract class ResolveResult {
   }
 
   public static final class Ok extends ResolveResult {
-    private final Object item;
+    private final Map<String, Object> items;
 
-    private Ok(final Object item) {
-      this.item = item;
+    private Ok(final Map<String, Object> items) {
+      this.items = items;
     }
 
-    public Object item() {
-      return this.item;
+    public Map<String, Object> items() {
+      return this.items;
     }
 
     @Override
@@ -122,29 +173,29 @@ public abstract class ResolveResult {
         return false;
       }
       final Ok ok = (Ok) o;
-      return this.item().equals(ok.item());
+      return this.items().equals(ok.items());
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(this.item());
+      return Objects.hash(this.items());
     }
 
     @Override
     public String toString() {
-      return "ResolveResult.Ok{item=" + this.item() + '}';
+      return "ResolveResult.Ok{items=" + this.items() + '}';
     }
   }
 
   public static final class Finished extends ResolveResult {
-    private final @Nullable String item;
+    private final Map<String, Object> items;
 
-    private Finished(final @Nullable String item) {
-      this.item = item;
+    private Finished(final Map<String, Object> items) {
+      this.items = items;
     }
 
-    public @Nullable String item() {
-      return this.item;
+    public Map<String, Object> items() {
+      return this.items;
     }
 
     @Override
@@ -156,17 +207,17 @@ public abstract class ResolveResult {
         return false;
       }
       final Finished ok = (Finished) o;
-      return Objects.equals(this.item(), ok.item());
+      return Objects.equals(this.items(), ok.items());
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(this.item());
+      return Objects.hash(this.items());
     }
 
     @Override
     public String toString() {
-      return "ResolveResult.Finished{item=" + this.item() + '}';
+      return "ResolveResult.Finished{items=" + this.items() + '}';
     }
   }
 }

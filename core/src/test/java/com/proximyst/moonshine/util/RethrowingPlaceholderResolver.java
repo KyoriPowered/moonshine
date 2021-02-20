@@ -16,30 +16,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package com.proximyst.moonshine.component.placeholder.standard;
+package com.proximyst.moonshine.util;
+
+import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.Multimap;
 import com.proximyst.moonshine.component.placeholder.IPlaceholderResolver;
 import com.proximyst.moonshine.component.placeholder.PlaceholderContext;
 import com.proximyst.moonshine.component.placeholder.ResolveResult;
+import com.proximyst.moonshine.internal.ThrowableUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class StandardCharacterPlaceholderResolver<R> implements IPlaceholderResolver<R, Character> {
+public class RethrowingPlaceholderResolver<R, T extends Throwable> implements IPlaceholderResolver<R, T> {
   @Override
-  public ResolveResult resolve(final String placeholderName, Character value,
-      final PlaceholderContext<R> ctx, final Multimap<String, @Nullable Object> flags) {
-    if (flags.isEmpty()) {
-      return ResolveResult.pass();
-    }
-
-    if (flags.containsEntry("uppercase", true)) {
-      value = Character.toUpperCase(value);
-    }
-
-    if (flags.containsEntry("lowercase", true)) {
-      value = Character.toLowerCase(value);
-    }
-
-    return ResolveResult.ok(placeholderName, String.valueOf(value));
+  public ResolveResult resolve(final String placeholderName, final T value, final PlaceholderContext<R> ctx,
+      final Multimap<String, @Nullable Object> flags) {
+    ThrowableUtils.sneakyThrow(value);
+    fail("value not rethrown?");
+    throw new AssertionError();
   }
 }

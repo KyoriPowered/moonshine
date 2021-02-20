@@ -28,8 +28,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class StandardFlatNumberPlaceholderResolver<N extends Number, R> implements IPlaceholderResolver<R, N> {
   @Override
-  public ResolveResult resolve(final N value, final PlaceholderContext<R> ctx,
-      final Multimap<String, @Nullable Object> flags) {
+  public ResolveResult resolve(final String placeholderName, final N value,
+      final PlaceholderContext<R> ctx, final Multimap<String, @Nullable Object> flags) {
     long val = value.longValue();
     if (flags.isEmpty()) {
       return ResolveResult.pass();
@@ -48,24 +48,24 @@ public final class StandardFlatNumberPlaceholderResolver<N extends Number, R> im
     }
 
     if (flags.containsEntry("hexadecimal", true) || flags.containsEntry("hex", true)) {
-      return ResolveResult.ok(Long.toHexString(val));
+      return ResolveResult.ok(placeholderName, Long.toHexString(val));
     }
 
     if (flags.containsEntry("octal", true)) {
-      return ResolveResult.ok(Long.toOctalString(val));
+      return ResolveResult.ok(placeholderName, Long.toOctalString(val));
     }
 
     final Collection<Object> radii = flags.get("radix");
     final Object radix = CollectionUtils.last(radii);
     if (radix != null) {
       if (radix instanceof Number) {
-        return ResolveResult.ok(Long.toString(val, ((Number) radix).intValue()));
+        return ResolveResult.ok(placeholderName, Long.toString(val, ((Number) radix).intValue()));
       } else if (radix instanceof String) {
         // The NumberFormatException is propagated.
-        return ResolveResult.ok(Long.toString(val, Integer.parseInt((String) radix)));
+        return ResolveResult.ok(placeholderName, Long.toString(val, Integer.parseInt((String) radix)));
       }
     }
 
-    return ResolveResult.ok(Long.toString(val));
+    return ResolveResult.ok(placeholderName, Long.toString(val));
   }
 }

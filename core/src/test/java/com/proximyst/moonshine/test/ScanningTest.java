@@ -18,13 +18,15 @@
 
 package com.proximyst.moonshine.test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import com.proximyst.moonshine.Moonshine;
+import com.proximyst.moonshine.annotation.Flag;
 import com.proximyst.moonshine.annotation.Message;
 import com.proximyst.moonshine.annotation.Placeholder;
 import com.proximyst.moonshine.annotation.Receiver;
-import com.proximyst.moonshine.exception.UnscannableMethodException;
+import com.proximyst.moonshine.component.placeholder.IPlaceholderResolver;
+import com.proximyst.moonshine.component.receiver.IReceiverResolver;
 import com.proximyst.moonshine.message.IMessageParser;
 import com.proximyst.moonshine.message.IMessageSender;
 import com.proximyst.moonshine.message.IMessageSource;
@@ -34,56 +36,38 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UnscannableMethodTest {
+class ScanningTest {
   @Mock
-  private IMessageParser<Object, Object, Object> messageParser;
+  private IMessageSource<Object, Object> messageSource;
 
   @Mock
   private IMessageSender<Object, Object> messageSender;
 
   @Mock
-  private IMessageSource<Object, Object> messageSource;
+  private IMessageParser<Object, Object, Object> messageParser;
 
+  @SuppressWarnings("unchecked")
   @Test
-  void noMessageKey() {
-    assertThrows(UnscannableMethodException.class, () -> Moonshine.builder()
-        .source(this.messageSource)
-        .parser(this.messageParser)
-        .sender(this.messageSender)
-        .create(NoMessageKey.class));
+  void scan() {
+    Moonshine.builder()
+        .placeholder(Object.class, mock(IPlaceholderResolver.class))
+        .receiver(mock(IReceiverResolver.class))
+        .source(mock(IMessageSource.class))
+        .parser(mock(IMessageParser.class))
+        .sender(mock(IMessageSender.class))
+        .create(TestMessages.class);
   }
 
-  @Test
-  void noReceiver() {
-    assertThrows(UnscannableMethodException.class, () -> Moonshine.builder()
-        .source(this.messageSource)
-        .parser(this.messageParser)
-        .sender(this.messageSender)
-        .create(NoReceiver.class));
-  }
+  interface TestMessages {
+    static void staticIsIgnored() {
+    }
 
-  @Test
-  void missingPlaceholderResolver() {
-    assertThrows(UnscannableMethodException.class, () -> Moonshine.builder()
-        .source(this.messageSource)
-        .parser(this.messageParser)
-        .sender(this.messageSender)
-        .create(MissingPlaceholderResolver.class));
-  }
+    default void defaultIsIgnored() {
+    }
 
-  interface NoMessageKey {
-    void test(final @Receiver Object receiver);
-  }
-
-  interface NoReceiver {
-    @Message("test")
-    void test();
-  }
-
-  interface MissingPlaceholderResolver {
     @Message("test")
     void test(final @Receiver Object receiver,
-
-        @Placeholder("you're my little pogchamp") final Void placeholder);
+        @Placeholder final Object placeholder,
+        @Flag(type = Object.class, name = "flag") final Object flag);
   }
 }

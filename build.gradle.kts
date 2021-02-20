@@ -28,11 +28,6 @@ subprojects {
         plugin<JacocoPlugin>()
     }
 
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-
     dependencies {
         api("com.google.guava:guava:30.1-jre")
         api("io.leangen.geantyref:geantyref:1.3.4")
@@ -81,6 +76,10 @@ subprojects {
 // These are some options that either won't apply to rootProject, or
 // will be nice to have to disable potential warnings and errors.
 allprojects {
+    repositories {
+        mavenCentral()
+    }
+
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = sourceCompatibility
@@ -141,8 +140,4 @@ allprojects {
             }
         }
     }
-}
-
-repositories {
-    jcenter() // Gradle plugins.
 }
