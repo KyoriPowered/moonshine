@@ -18,6 +18,7 @@
 
 package com.proximyst.moonshine.test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,7 @@ import com.proximyst.moonshine.annotation.Receiver;
 import com.proximyst.moonshine.message.IMessageParser;
 import com.proximyst.moonshine.message.IMessageSender;
 import com.proximyst.moonshine.message.IMessageSource;
+import com.proximyst.moonshine.util.RethrowingPlaceholderResolver;
 import com.proximyst.moonshine.util.StringReplaceMessageParser;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -58,6 +60,7 @@ class PlaceholderTest {
   void setUp() {
     when(this.messageSource.message(any(), any())).thenReturn(MESSAGE);
     this.testMessages = Moonshine.<String>builder()
+        .placeholder(Throwable.class, new RethrowingPlaceholderResolver<>())
         .source(this.messageSource)
         .parser(MESSAGE_PARSER)
         .sender(this.messageSender)
@@ -133,6 +136,26 @@ class PlaceholderTest {
     verify(this.messageSender).sendMessage("receiver", "abc " + Double.toHexString(num));
   }
 
+  @Test
+  void throwingRuntimeExceptionOnResolve() {
+    final RuntimeException exception = new RuntimeException("Test exception");
+    assertThatThrownBy(() -> this.testMessages.throwingOnResolve(null, exception))
+        .isSameAs(exception);
+  }
+
+  @ParameterizedTest
+  @ValueSource(classes = {
+      OutOfMemoryError.class,
+      IndexOutOfBoundsException.class,
+      NullPointerException.class,
+      Throwable.class,
+  })
+  void throwingThrowableOnResolve(final Class<? extends Throwable> type) throws Throwable {
+    final Throwable throwable = type.getConstructor().newInstance();
+    assertThatThrownBy(() -> this.testMessages.throwingOnResolve(null, throwable))
+        .isSameAs(throwable);
+  }
+
   interface TestMessages {
     @Message("simpleplaceholder")
     void simple(final @Receiver Object receiver,
@@ -162,5 +185,16 @@ class PlaceholderTest {
 
         @Flag(type = Number.class, name = "hexadecimal") final boolean hex,
         @Flag(type = Number.class, name = "flip") final boolean flipSign);
+
+    @Message("throwing")
+    void throwingOnResolve(final @Receiver Object receiver,
+
+        @Placeholder final RuntimeException exception);
+
+    @Message("throwing")
+    void throwingOnResolve(final @Receiver Object receiver,
+
+        @Placeholder final Throwable throwable)
+        throws Throwable;
   }
 }

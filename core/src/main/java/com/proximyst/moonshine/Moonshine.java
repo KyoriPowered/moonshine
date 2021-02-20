@@ -65,6 +65,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * This is the entrypoint helper class to moonshine.
@@ -125,14 +126,21 @@ public final class Moonshine<R, M, O> {
     return MoonshineBuilder.newBuilder();
   }
 
-  @Pure
+  @SideEffectFree
   public Collection<IPlaceholderResolver<R, ?>> resolversFor(final AnnotatedType annotatedType) {
     return this.resolversFor(annotatedType.getType());
   }
 
-  @Pure
+  @SideEffectFree
   public Collection<IPlaceholderResolver<R, ?>> resolversFor(final Type type) {
-    return this.placeholderResolvers.get(GenericTypeReflector.erase(type));
+    Class<?> erasedType = GenericTypeReflector.erase(type);
+    final List<IPlaceholderResolver<R, ?>> resolvers = new ArrayList<>(this.placeholderResolvers.get(erasedType));
+    while (erasedType != Object.class && erasedType != null) {
+      erasedType = erasedType.getSuperclass();
+      resolvers.addAll(0, this.placeholderResolvers.get(erasedType));
+    }
+
+    return resolvers;
   }
 
   @Pure
