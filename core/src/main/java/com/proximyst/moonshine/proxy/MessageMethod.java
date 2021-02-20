@@ -42,19 +42,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class MessageMethod<R, M> {
   private final String messageKey;
   private final List<PlaceholderData> placeholders;
-  private final IReceiver<R> receiverLocator;
+  private final @Nullable IReceiver<R> receiverLocator;
   private final Table<String, Class<?>, Integer> flags;
 
   public MessageMethod(final Method method, final Moonshine<R, ?, M> moonshine) {
-    // First we need to scan the method to ensure it's valid at all.
-
-    if (!Void.TYPE.isAssignableFrom(method.getReturnType())) {
-      throw new UnscannableMethodException("Return type is not void or Void on "
-          + ReflectionUtils.formatMethod(method));
-    }
-
     // We need to scan the method for its metadata.
-
     final Message messageAnnotation = method.getAnnotation(Message.class);
     if (messageAnnotation == null) {
       throw new UnscannableMethodException("Missing @Message annotation on " + ReflectionUtils.formatMethod(method));
@@ -87,7 +79,7 @@ public final class MessageMethod<R, M> {
         break;
       }
     }
-    if (receiverLocator == null) {
+    if (receiverLocator == null && Void.TYPE.isAssignableFrom(method.getReturnType())) {
       throw new UnscannableMethodException("Missing viable IReceiver on " + ReflectionUtils.formatMethod(method));
     }
 
@@ -118,7 +110,7 @@ public final class MessageMethod<R, M> {
     return this.placeholders;
   }
 
-  public IReceiver<R> receiverLocator() {
+  public @Nullable IReceiver<R> receiverLocator() {
     return this.receiverLocator;
   }
 

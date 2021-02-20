@@ -280,10 +280,9 @@ public final class Moonshine<R, M, O> {
       throw new IllegalStateException("unknown message method: " + ReflectionUtils.formatMethod(method));
     }
 
-    // The receiver locator should already exist for this method.
-    // If there is valid receiver, this should already be handled upon method scanning.
-    // The receiver is therefore always valid, however not necessarily non-null.
-    final R receiver = messageMethod.receiverLocator().find(new ReceiverContext(method, proxy, args));
+    final R receiver = messageMethod.receiverLocator() != null
+        ? messageMethod.receiverLocator().find(new ReceiverContext(method, proxy, args))
+        : null;
 
     // Get the raw message from the message source.
     final O rawMessage = this.messageSource.message(messageMethod.messageKey(), receiver);
@@ -320,9 +319,12 @@ public final class Moonshine<R, M, O> {
     final ParsingContext<R> parsingContext = new ParsingContext<>(placeholders, receiver);
     final M message = this.messageParser.parse(rawMessage, parsingContext);
 
-    this.messageSender.sendMessage(receiver, message);
-
-    return null;
+    if (Void.TYPE.isAssignableFrom(method.getReturnType())) {
+      this.messageSender.sendMessage(receiver, message);
+      return null;
+    } else {
+      return message;
+    }
   }
 
   private static class EmptyCell {
