@@ -133,7 +133,7 @@ public final class Moonshine<R, M, O> {
 
   @SideEffectFree
   public Collection<IPlaceholderResolver<R, ?>> resolversFor(final Type type) {
-    Class<?> erasedType = GenericTypeReflector.erase(type);
+    Class<?> erasedType = GenericTypeReflector.erase(GenericTypeReflector.box(type));
     final List<IPlaceholderResolver<R, ?>> resolvers = new ArrayList<>(this.placeholderResolvers.get(erasedType));
     while (erasedType != Object.class && erasedType != null) {
       erasedType = erasedType.getSuperclass();
