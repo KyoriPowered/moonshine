@@ -221,12 +221,14 @@ public final class Moonshine<R, M, O> {
       throw new IllegalStateException("Result is not Ok; open an issue at https://github.com/Proximyst/moonshine");
     }
 
-    final Map<String, Object> items = new HashMap<>(((ResolveResult.Ok) result).items());
-    if (items.isEmpty()) {
+    final Map<String, Object> resolvedItems = ((ResolveResult.Ok) result).items();
+    if (resolvedItems.isEmpty()) {
       return ImmutableMap.of();
     }
 
-    final Iterator<Entry<String, Object>> itemIterator = items.entrySet().iterator();
+    final Map<String, Object> items = new HashMap<>(resolvedItems.size());
+
+    final Iterator<Entry<String, Object>> itemIterator = resolvedItems.entrySet().iterator();
     //noinspection WhileLoopReplaceableByForEach - we cannot modify and iterate
     while (itemIterator.hasNext()) {
       final Entry<String, Object> entry = itemIterator.next();
