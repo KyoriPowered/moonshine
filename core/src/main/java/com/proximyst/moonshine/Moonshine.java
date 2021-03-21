@@ -226,8 +226,7 @@ public final class Moonshine<R, M, O> {
       return ImmutableMap.of();
     }
 
-    final Map<String, Object> items = new HashMap<>(resolvedItems.size());
-
+    final Map<String, Object> items = new HashMap<>(resolvedItems);
     final Iterator<Entry<String, Object>> itemIterator = resolvedItems.entrySet().iterator();
     //noinspection WhileLoopReplaceableByForEach - we cannot modify and iterate
     while (itemIterator.hasNext()) {
