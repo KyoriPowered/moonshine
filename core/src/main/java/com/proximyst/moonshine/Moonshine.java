@@ -58,6 +58,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -225,7 +226,10 @@ public final class Moonshine<R, M, O> {
       return ImmutableMap.of();
     }
 
-    for (final Entry<String, Object> entry : items.entrySet()) {
+    final Iterator<Entry<String, Object>> itemIterator = items.entrySet().iterator();
+    //noinspection WhileLoopReplaceableByForEach - we cannot modify and iterate
+    while (itemIterator.hasNext()) {
+      final Entry<String, Object> entry = itemIterator.next();
       final Map<String, String> resolved = this.resolvePlaceholder(placeholderContext, flags,
           resolverFlags, entry.getKey(), entry.getValue(), placeholderData);
       items.putAll(resolved);
