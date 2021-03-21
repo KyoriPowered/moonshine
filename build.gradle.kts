@@ -130,7 +130,12 @@ allprojects {
         repositories {
             maven {
                 name = "proxi-nexus"
-                url = uri("https://nexus.proximyst.com/repository/maven-any/")
+                val repo = if (project.version.toString().endsWith("-SNAPSHOT")) {
+                    "snapshots"
+                } else {
+                    "releases"
+                }
+                url = uri("https://nexus.proximyst.com/repository/maven-$repo/")
                 credentials {
                     val proxiUser: String? by project
                     val proxiPassword: String? by project
