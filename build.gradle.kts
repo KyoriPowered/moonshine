@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
     group = "com.proximyst.moonshine"
-    version = "0.2.3"
+    version = "0.2.4-SNAPSHOT"
 }
 
 subprojects {

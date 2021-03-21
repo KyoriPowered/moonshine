@@ -38,7 +38,6 @@ import com.proximyst.moonshine.component.receiver.IReceiverResolver;
 import com.proximyst.moonshine.component.receiver.ReceiverContext;
 import com.proximyst.moonshine.component.receiver.StandardReceiverParameterResolver;
 import com.proximyst.moonshine.exception.PlaceholderResolvingErrorResultException;
-import com.proximyst.moonshine.exception.UnresolvablePlaceholderException;
 import com.proximyst.moonshine.internal.IFindMethod;
 import com.proximyst.moonshine.internal.ThrowableUtils;
 import com.proximyst.moonshine.internal.jre8.Java8FindMethod;
@@ -138,12 +137,12 @@ public final class Moonshine<R, M, O> {
     Class<?> erasedType = GenericTypeReflector.erase(GenericTypeReflector.box(type));
     final List<IPlaceholderResolver<R, ?>> resolvers = new ArrayList<>(this.placeholderResolvers.get(erasedType));
     while (erasedType != Object.class && erasedType != null) {
+      for (final Class<?> implementedInterface : erasedType.getInterfaces()) {
+        resolvers.addAll(0, this.resolversFor(implementedInterface));
+      }
+
       erasedType = erasedType.getSuperclass();
       resolvers.addAll(0, this.placeholderResolvers.get(erasedType));
-    }
-
-    if (resolvers.isEmpty()) {
-      throw new UnresolvablePlaceholderException("No placeholder resolvers exist for " + type.getTypeName());
     }
 
     return resolvers;
