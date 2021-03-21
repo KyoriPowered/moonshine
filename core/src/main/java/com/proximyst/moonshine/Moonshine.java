@@ -259,12 +259,10 @@ public final class Moonshine<R, M, O> {
       try {
         final MethodHandle handle = FIND_METHOD_UTIL.findMethod(method, proxy);
         if (args.length == 0) {
-          handle.invokeExact(proxy);
+          return handle.invokeExact(proxy);
         } else {
-          handle.invokeWithArguments(args);
+          return handle.invokeWithArguments(args);
         }
-
-        return null;
       } catch (final Throwable throwable) {
         ThrowableUtils.sneakyThrow(throwable);
         throw new RuntimeException(throwable);
