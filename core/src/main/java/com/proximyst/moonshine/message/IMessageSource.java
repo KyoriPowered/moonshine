@@ -18,7 +18,9 @@
 
 package com.proximyst.moonshine.message;
 
-public interface IMessageSource<T, R> {
+import org.checkerframework.checker.nullness.qual.PolyNull;
+
+public interface IMessageSource<T, @PolyNull R> {
   /**
    * Fetch a message from the source of messages.
    * <p>

@@ -21,6 +21,7 @@ package com.proximyst.moonshine.component.placeholder;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A result of a resolving.
@@ -114,6 +115,11 @@ public abstract class ResolveResult {
     }
 
     @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    @Override
     public String toString() {
       return "ResolveResult.Pass";
     }
@@ -131,7 +137,7 @@ public abstract class ResolveResult {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
       }
@@ -165,7 +171,7 @@ public abstract class ResolveResult {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
       }
@@ -199,7 +205,7 @@ public abstract class ResolveResult {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
       if (this == o) {
         return true;
       }

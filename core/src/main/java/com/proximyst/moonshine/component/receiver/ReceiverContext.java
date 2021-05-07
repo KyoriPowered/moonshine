@@ -19,13 +19,14 @@
 package com.proximyst.moonshine.component.receiver;
 
 import java.lang.reflect.Method;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ReceiverContext {
   private final Method method;
   private final Object proxy;
-  private final Object[] parameters;
+  private final @Nullable Object[] parameters;
 
-  public ReceiverContext(final Method method, final Object proxy, final Object[] parameters) {
+  public ReceiverContext(final Method method, final Object proxy, final @Nullable Object[] parameters) {
     this.method = method;
     this.proxy = proxy;
     this.parameters = parameters;
@@ -39,7 +40,7 @@ public final class ReceiverContext {
     return this.proxy;
   }
 
-  public Object[] parameters() {
+  public @Nullable Object[] parameters() {
     return this.parameters;
   }
 }

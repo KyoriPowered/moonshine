@@ -18,12 +18,10 @@
 
 package com.proximyst.moonshine.exception;
 
-public final class UnscannableMethodException extends MoonshineException {
-  public UnscannableMethodException(final String message) {
-    super(message);
-  }
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-  public UnscannableMethodException(final String message, final Throwable cause) {
-    super(message, cause);
+public final class UnscannableMethodException extends MoonshineException {
+  public UnscannableMethodException(final @Nullable String message) {
+    super(message);
   }
 }

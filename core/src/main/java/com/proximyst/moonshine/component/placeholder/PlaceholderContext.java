@@ -22,7 +22,7 @@ import com.google.common.collect.Multimap;
 import java.lang.reflect.Method;
 
 /**
- * A context for a run of {@link IPlaceholderResolver#resolve(Object, PlaceholderContext, Multimap)}.
+ * A context for a run of {@link IPlaceholderResolver#resolve(String, Object, PlaceholderContext, Multimap)}.
  *
  * @param <R> The receiver type for the {@link IPlaceholderResolver}.
  */

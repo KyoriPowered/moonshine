@@ -38,15 +38,15 @@ public final class StandardBooleanPlaceholderResolver<R> implements IPlaceholder
       value = !value;
     }
 
-    if (value) {
+    if (Boolean.TRUE.equals(value)) {
       final Collection<@Nullable Object> nameTrue = flags.get("true-name");
-      final Object name = CollectionUtils.last(nameTrue);
+      final @Nullable Object name = CollectionUtils.last(nameTrue);
       if (name != null) {
         return ResolveResult.ok(placeholderName, name);
       }
     } else {
       final Collection<@Nullable Object> nameFalse = flags.get("false-name");
-      final Object name = CollectionUtils.last(nameFalse);
+      final @Nullable Object name = CollectionUtils.last(nameFalse);
       if (name != null) {
         return ResolveResult.ok(placeholderName, name);
       }

@@ -35,6 +35,7 @@ import com.proximyst.moonshine.util.RethrowingPlaceholderResolver;
 import com.proximyst.moonshine.util.StringReplaceMessageParser;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -179,7 +180,7 @@ class PlaceholderTest {
         @Flag(type = Number.class, name = "flip") final boolean flipSign);
 
     @Message("number")
-    void floatingNumber(final @Receiver Object receiver,
+    void floatingNumber(final @Receiver @Nullable Object receiver,
 
         @Placeholder(flags = {"hexadecimal", "octal", "flip"}) final Number placeholder,
 
@@ -187,12 +188,12 @@ class PlaceholderTest {
         @Flag(type = Number.class, name = "flip") final boolean flipSign);
 
     @Message("throwing")
-    void throwingOnResolve(final @Receiver Object receiver,
+    void throwingOnResolve(final @Receiver @Nullable Object receiver,
 
         @Placeholder final RuntimeException exception);
 
     @Message("throwing")
-    void throwingOnResolve(final @Receiver Object receiver,
+    void throwingOnResolve(final @Receiver @Nullable Object receiver,
 
         @Placeholder final Throwable throwable)
         throws Throwable;

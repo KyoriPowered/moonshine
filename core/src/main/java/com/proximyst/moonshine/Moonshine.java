@@ -160,9 +160,9 @@ public final class Moonshine<R, M, O> {
     // We do this by leveraging the provided multi-map, as clearing is faster than allocating.
     resolverFlags.clear();
     for (final String flag : placeholderData.flags()) {
-      Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value.getClass()));
+      @Nullable Class<?> type = GenericTypeReflector.erase(GenericTypeReflector.box(value.getClass()));
       while (type != null) {
-        final Object flagValue = flags.get(flag, type);
+        final @Nullable Object flagValue = flags.get(flag, type);
         if (flagValue != null) {
           resolverFlags.put(flag, flagValue == EmptyCell.INSTANCE ? null : flagValue);
         }
@@ -243,7 +243,7 @@ public final class Moonshine<R, M, O> {
     return Maps.transformValues(items, String::valueOf);
   }
 
-  @Nullable Object proxyInvocation(final Object proxy, final Method method, Object @Nullable [] args) {
+  @Nullable Object proxyInvocation(final Object proxy, final Method method, @Nullable Object @Nullable [] args) {
     if (args == null) {
       // We should not allocate an extra array for most usages, and we cannot
       // accept null arguments.
@@ -287,15 +287,13 @@ public final class Moonshine<R, M, O> {
       throw new IllegalStateException("unknown message method: " + ReflectionUtils.formatMethod(method));
     }
 
-    final R receiver = messageMethod.receiverLocator() != null
+    final @Nullable R receiver = messageMethod.receiverLocator() != null
         ? messageMethod.receiverLocator().find(new ReceiverContext(method, proxy, args))
         : null;
 
     // Get the raw message from the message source.
+    @SuppressWarnings("ConstantConditions") // The receiver is PolyNull; only null if so is requested
     final O rawMessage = this.messageSource.message(messageMethod.messageKey(), receiver);
-    if (rawMessage == null) {
-      throw new IllegalStateException("No message for key " + messageMethod.messageKey());
-    }
 
     // We need to find all the available flags on this specific method.
     // We know that the flag indices are going to be within bounds, because they
@@ -303,7 +301,7 @@ public final class Moonshine<R, M, O> {
     //   out of bounds here.
     final Table<String, Class<?>, Object> flags = HashBasedTable.create();
     for (final Cell<String, Class<?>, Integer> cell : messageMethod.flags().cellSet()) {
-      final Object value = args[Objects.requireNonNull(cell.getValue())];
+      final @Nullable Object value = args[Objects.requireNonNull(cell.getValue())];
       flags.put(Objects.requireNonNull(cell.getRowKey()),
           Objects.requireNonNull(cell.getColumnKey()),
           value == null ? EmptyCell.INSTANCE : value);
@@ -318,7 +316,12 @@ public final class Moonshine<R, M, O> {
 
     final Multimap<String, Object> resolverFlags = HashMultimap.create();
     for (final PlaceholderData placeholderData : messageMethod.placeholders()) {
-      final Object value = args[placeholderData.index()];
+      final @Nullable Object value = args[placeholderData.index()];
+      if (value == null) {
+        // There's nothing to make a placeholder of.
+        continue;
+      }
+
       placeholders.putAll(this.resolvePlaceholder(placeholderContext, flags, resolverFlags,
           placeholderData.name(), value, placeholderData));
     }

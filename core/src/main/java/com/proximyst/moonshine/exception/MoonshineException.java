@@ -18,16 +18,18 @@
 
 package com.proximyst.moonshine.exception;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public abstract class MoonshineException extends RuntimeException {
-  public MoonshineException(final String message) {
+  protected MoonshineException(final @Nullable String message) {
     super(message);
   }
 
-  public MoonshineException(final String message, final Throwable cause) {
+  protected MoonshineException(final @Nullable String message, final @Nullable Throwable cause) {
     super(message, cause);
   }
 
-  public MoonshineException(final Throwable cause) {
+  protected MoonshineException(final @Nullable Throwable cause) {
     super(cause);
   }
 }

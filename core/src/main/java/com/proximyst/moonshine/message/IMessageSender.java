@@ -18,6 +18,8 @@
 
 package com.proximyst.moonshine.message;
 
-public interface IMessageSender<R, M> {
+import org.checkerframework.checker.nullness.qual.PolyNull;
+
+public interface IMessageSender<@PolyNull R, M> {
   void sendMessage(R receiver, M message);
 }

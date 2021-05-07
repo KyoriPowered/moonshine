@@ -18,6 +18,8 @@
 
 package com.proximyst.moonshine.component.receiver;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public interface IReceiver<R> {
-  R find(final ReceiverContext ctx);
+  @Nullable R find(final ReceiverContext ctx);
 }

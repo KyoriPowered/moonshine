@@ -55,15 +55,13 @@ public final class StandardFlatNumberPlaceholderResolver<N extends Number, R> im
       return ResolveResult.ok(placeholderName, Long.toOctalString(val));
     }
 
-    final Collection<Object> radii = flags.get("radix");
-    final Object radix = CollectionUtils.last(radii);
-    if (radix != null) {
-      if (radix instanceof Number) {
-        return ResolveResult.ok(placeholderName, Long.toString(val, ((Number) radix).intValue()));
-      } else if (radix instanceof String) {
-        // The NumberFormatException is propagated.
-        return ResolveResult.ok(placeholderName, Long.toString(val, Integer.parseInt((String) radix)));
-      }
+    final @Nullable Collection<@Nullable Object> radii = flags.get("radix");
+    final @Nullable Object radix = CollectionUtils.last(radii);
+    if (radix instanceof Number) {
+      return ResolveResult.ok(placeholderName, Long.toString(val, ((Number) radix).intValue()));
+    } else if (radix instanceof String) {
+      // The NumberFormatException is propagated.
+      return ResolveResult.ok(placeholderName, Long.toString(val, Integer.parseInt((String) radix)));
     }
 
     return ResolveResult.ok(placeholderName, Long.toString(val));

@@ -18,8 +18,10 @@
 
 package com.proximyst.moonshine.exception;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public final class PlaceholderResolvingErrorResultException extends MoonshineException{
-  public PlaceholderResolvingErrorResultException(final Throwable cause) {
+  public PlaceholderResolvingErrorResultException(final @Nullable Throwable cause) {
     super("Exception occurred while resolving placeholders", cause);
   }
 }

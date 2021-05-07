@@ -24,6 +24,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Data about a single placeholder on a {@link MessageMethod}.
@@ -70,7 +71,7 @@ public final class PlaceholderData {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(final @Nullable Object o) {
     if (this == o) {
       return true;
     }
@@ -78,10 +79,10 @@ public final class PlaceholderData {
       return false;
     }
     final PlaceholderData that = (PlaceholderData) o;
-    return this.name.equals(that.name()) &&
-        this.type.equals(that.type()) &&
-        Arrays.equals(this.flags(), that.flags()) &&
-        this.index() == that.index();
+    return this.name.equals(that.name())
+        && this.type.equals(that.type())
+        && Arrays.equals(this.flags(), that.flags())
+        && this.index() == that.index();
   }
 
   @Override
@@ -94,12 +95,10 @@ public final class PlaceholderData {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("Placeholder{");
-    sb.append("name='").append(this.name()).append('\'');
-    sb.append(", type=").append(this.type());
-    sb.append(", flags=").append(Arrays.toString(this.flags()));
-    sb.append(", index=").append(this.index());
-    sb.append('}');
-    return sb.toString();
+    return "PlaceholderData{" + "name='" + this.name() + '\''
+        + ", type=" + this.type()
+        + ", flags=" + Arrays.toString(this.flags())
+        + ", index=" + this.index()
+        + '}';
   }
 }

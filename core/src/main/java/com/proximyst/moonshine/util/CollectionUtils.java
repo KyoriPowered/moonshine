@@ -29,14 +29,18 @@ public final class CollectionUtils {
   private CollectionUtils() {
   }
 
-  public static <T> @Nullable T last(final Collection<T> collection) {
+  public static <T> @Nullable T last(final @Nullable Collection<T> collection) {
+    if (collection == null) {
+      return null;
+    }
+
     if (!collection.isEmpty()
         && collection instanceof List
         && collection instanceof RandomAccess) {
       return ((List<T>) collection).get(collection.size() - 1);
     }
 
-    T value = null;
+    @Nullable T value = null;
     final Iterator<T> iterator = collection.iterator();
     //noinspection WhileLoopReplaceableByForEach
     while (iterator.hasNext()) {

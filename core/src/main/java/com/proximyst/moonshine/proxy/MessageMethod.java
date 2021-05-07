@@ -47,7 +47,7 @@ public final class MessageMethod<R, M> {
 
   public MessageMethod(final Method method, final Moonshine<R, ?, M> moonshine) {
     // We need to scan the method for its metadata.
-    final Message messageAnnotation = method.getAnnotation(Message.class);
+    final @Nullable Message messageAnnotation = method.getAnnotation(Message.class);
     if (messageAnnotation == null) {
       throw new UnscannableMethodException("Missing @Message annotation on " + ReflectionUtils.formatMethod(method));
     }
@@ -56,7 +56,7 @@ public final class MessageMethod<R, M> {
     final Parameter[] parameters = method.getParameters();
     for (int i = 0; i < parameters.length; i++) {
       final Parameter parameter = parameters[i];
-      final PlaceholderData data = this.findPlaceholder(parameter, i);
+      final @Nullable PlaceholderData data = this.findPlaceholder(parameter, i);
       if (data != null) {
         if (moonshine.resolversFor(data.type()).isEmpty()) {
           throw new UnscannableMethodException("No placeholder resolver for "
@@ -70,7 +70,7 @@ public final class MessageMethod<R, M> {
       }
     }
 
-    IReceiver<R> receiverLocator = null;
+    @Nullable IReceiver<R> receiverLocator = null;
     final ListIterator<IReceiverResolver<R>> resolvers = moonshine.receiverResolvers()
         .listIterator(moonshine.receiverResolvers().size());
     while (resolvers.hasPrevious()) {
@@ -119,7 +119,7 @@ public final class MessageMethod<R, M> {
   }
 
   private @Nullable PlaceholderData findPlaceholder(final Parameter parameter, final int index) {
-    final Placeholder placeholderAnnotation = parameter.getAnnotation(Placeholder.class);
+    final @Nullable Placeholder placeholderAnnotation = parameter.getAnnotation(Placeholder.class);
     if (placeholderAnnotation == null) {
       return null;
     }
