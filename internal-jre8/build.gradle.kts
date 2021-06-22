@@ -1,3 +1,3 @@
 dependencies {
-    api(project(":internal-common"))
+    api(project(":moonshine-internal-common"))
 }

@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":internal-common"))
-    implementation(project(":internal-jre8"))
-    implementation(project(":internal-jre9"))
+    implementation(project(":moonshine-internal-common"))
+    implementation(project(":moonshine-internal-jre8"))
+    implementation(project(":moonshine-internal-jre9"))
 }
