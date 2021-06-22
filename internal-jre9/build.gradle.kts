@@ -1,9 +1,8 @@
 java {
     sourceCompatibility = JavaVersion.VERSION_1_9
     targetCompatibility = sourceCompatibility
-    disableAutoTargetJvm()
 }
 
 dependencies {
-    api(project(":internal-common"))
+    api(project(":moonshine-internal-common"))
 }

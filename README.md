@@ -1,7 +1,7 @@
 # moonshine
 
-![GitHub branch checks state](https://img.shields.io/github/checks-status/Proximyst/moonshine/main?style=flat-square)
-![Codecov](https://img.shields.io/codecov/c/github/Proximyst/moonshine?style=flat-square)
+![GitHub branch checks state](https://img.shields.io/github/checks-status/KyoriPowered/moonshine/main?style=flat-square)
+![Codecov](https://img.shields.io/codecov/c/github/KyoriPowered/moonshine?style=flat-square)
 
 > **Q:** What do you say when you're gonna drunk dial someone?
 >

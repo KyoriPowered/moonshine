@@ -1,6 +1,6 @@
-import java.util.Calendar
 import nl.javadude.gradle.plugins.license.LicensePlugin
 import org.checkerframework.gradle.plugin.CheckerFrameworkPlugin
+import java.util.*
 
 plugins {
     java
@@ -8,13 +8,14 @@ plugins {
     `maven-publish`
     checkstyle
     jacoco
+    idea
     id("com.github.hierynomus.license") version "0.16.1"
     id("org.checkerframework") version "0.5.22"
 }
 
 allprojects {
-    group = "com.proximyst.moonshine"
-    version = "1.0.0"
+    group = "net.kyori.moonshine"
+    version = "2.0.0-SNAPSHOT"
 }
 
 subprojects {
@@ -26,6 +27,7 @@ subprojects {
         plugin<LicensePlugin>()
         plugin<CheckerFrameworkPlugin>()
         plugin<JacocoPlugin>()
+        plugin<IdeaPlugin>()
     }
 
     dependencies {
@@ -135,7 +137,7 @@ allprojects {
                 } else {
                     "releases"
                 }
-                url = uri("https://nexus.proximyst.com/repository/maven-$repo/")
+                url = uri("https://nexus.mardroemmar.dev/repository/maven-$repo/")
                 credentials {
                     val proxiUser: String? by project
                     val proxiPassword: String? by project
