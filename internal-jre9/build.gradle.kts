@@ -1,4 +1,4 @@
-configure<JavaPluginConvention> {
+java {
     sourceCompatibility = JavaVersion.VERSION_1_9
     targetCompatibility = sourceCompatibility
     disableAutoTargetJvm()

@@ -8,8 +8,8 @@ plugins {
     `maven-publish`
     checkstyle
     jacoco
-    id("com.github.hierynomus.license") version "0.15.0"
-    id("org.checkerframework") version "0.5.12"
+    id("com.github.hierynomus.license") version "0.16.1"
+    id("org.checkerframework") version "0.5.22"
 }
 
 allprojects {
@@ -52,8 +52,8 @@ subprojects {
         jacocoTestReport {
             dependsOn(test)
             reports {
-                xml.isEnabled = true
-                html.isEnabled = false
+                xml.required.set(true)
+                html.required.set(false)
             }
         }
 
@@ -80,7 +80,7 @@ allprojects {
         mavenCentral()
     }
 
-    configure<JavaPluginConvention> {
+    extensions.configure(JavaPluginExtension::class) {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = sourceCompatibility
         disableAutoTargetJvm()
@@ -95,8 +95,8 @@ allprojects {
     }
 
     checkstyle {
-        toolVersion = "8.36.2"
-        val configRoot = rootProject.projectDir
+        toolVersion = "8.43"
+        val configRoot = rootProject.projectDir.resolve(".checkstyle")
         configDirectory.set(configRoot)
         configProperties["basedir"] = configRoot.absolutePath
     }
