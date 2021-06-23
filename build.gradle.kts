@@ -1,5 +1,6 @@
 import nl.javadude.gradle.plugins.license.LicensePlugin
 import org.checkerframework.gradle.plugin.CheckerFrameworkPlugin
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import java.util.*
 
 plugins {
@@ -9,6 +10,7 @@ plugins {
     checkstyle
     jacoco
     idea
+    kotlin("jvm") version "1.5.10"
     id("com.github.hierynomus.license") version "0.16.1"
     id("org.checkerframework") version "0.5.22"
 }
@@ -24,10 +26,11 @@ subprojects {
         plugin<JavaLibraryPlugin>()
         plugin<MavenPublishPlugin>()
         plugin<CheckstylePlugin>()
-        plugin<LicensePlugin>()
-        plugin<CheckerFrameworkPlugin>()
         plugin<JacocoPlugin>()
         plugin<IdeaPlugin>()
+        plugin<KotlinPlatformJvmPlugin>()
+        plugin<LicensePlugin>()
+        plugin<CheckerFrameworkPlugin>()
     }
 
     dependencies {
@@ -35,11 +38,12 @@ subprojects {
         api("io.leangen.geantyref:geantyref:1.3.4")
 
         testImplementation("org.junit.jupiter:junit-jupiter:5.+")
-        testImplementation("org.mockito:mockito-core:3.+")
-        testImplementation("org.mockito:mockito-junit-jupiter:3.+")
         testImplementation("org.assertj:assertj-core:3.+")
-
-        testImplementation("org.apache.commons:commons-lang3:3.11")
+        testImplementation(kotlin("stdlib-jdk8"))
+        testImplementation(kotlin("reflect"))
+        testImplementation("io.kotest:kotest-runner-junit5:4.+")
+        testImplementation("io.kotest:kotest-assertions-core:4.+")
+        testImplementation("io.mockk:mockk:1.10.6")
     }
 
     tasks {
@@ -47,6 +51,9 @@ subprojects {
         test {
             useJUnitPlatform()
             dependsOn(checkstyleMain, checkstyleTest)
+            if (!System.getenv("CI").toBoolean()) {
+                dependsOn(licenseFormat)
+            }
             dependsOn(licenseMain, licenseTest)
             finalizedBy(jacocoTestReport)
         }
@@ -92,6 +99,7 @@ allprojects {
         header = rootProject.file("LICENCE-HEADER")
         ext["year"] = Calendar.getInstance().get(Calendar.YEAR)
         include("**/*.java")
+        include("**/*.kt")
 
         mapping("java", "DOUBLESLASH_STYLE")
     }
@@ -119,6 +127,16 @@ allprojects {
 
         compileTestJava {
             options.compilerArgs.add("-parameters")
+        }
+
+        compileKotlin {
+            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.javaParameters = true
+        }
+
+        compileTestKotlin {
+            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.javaParameters = true
         }
     }
 

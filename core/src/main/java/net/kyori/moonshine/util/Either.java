@@ -53,20 +53,18 @@ public final class Either<L, R> {
   }
 
   @SideEffectFree
+  public Optional<L> left() {
+    return Optional.ofNullable(this.leftRaw());
+  }
+
+  @SideEffectFree
   public static <L, R> Either<L, R> right(final R right) {
     return new Either<>(null, right);
   }
 
-  @EnsuresNonNullIf(expression = "this.left", result = true)
-  @Pure
-  public boolean isLeft() {
-    return this.left != null;
-  }
-
-  @EnsuresNonNullIf(expression = "this.right", result = true)
-  @Pure
-  public boolean isRight() {
-    return this.right != null;
+  @SideEffectFree
+  public Optional<R> right() {
+    return Optional.ofNullable(this.rightRaw());
   }
 
   @Pure
@@ -79,14 +77,16 @@ public final class Either<L, R> {
     return this.right;
   }
 
-  @SideEffectFree
-  public Optional<L> left() {
-    return Optional.ofNullable(this.leftRaw());
+  @EnsuresNonNullIf(expression = "this.left", result = true)
+  @Pure
+  public boolean isLeft() {
+    return this.left != null;
   }
 
-  @SideEffectFree
-  public Optional<R> right() {
-    return Optional.ofNullable(this.rightRaw());
+  @EnsuresNonNullIf(expression = "this.right", result = true)
+  @Pure
+  public boolean isRight() {
+    return this.right != null;
   }
 
   @Pure
