@@ -18,6 +18,15 @@
 
 package net.kyori.moonshine;
 
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NavigableSet;
+import javax.annotation.concurrent.ThreadSafe;
 import net.kyori.moonshine.exception.scan.UnscannableMethodException;
 import net.kyori.moonshine.message.IMessageRenderer;
 import net.kyori.moonshine.message.IMessageSender;
@@ -27,16 +36,6 @@ import net.kyori.moonshine.placeholder.IPlaceholderResolver;
 import net.kyori.moonshine.receiver.IReceiverLocatorResolver;
 import net.kyori.moonshine.strategy.IPlaceholderResolverStrategy;
 import net.kyori.moonshine.util.Weighted;
-import io.leangen.geantyref.GenericTypeReflector;
-import io.leangen.geantyref.TypeToken;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.TreeSet;
-import javax.annotation.concurrent.ThreadSafe;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
@@ -83,50 +82,55 @@ public final class Moonshine<R, I, O, F> {
   /**
    * A navigable set for iterating through the {@link IReceiverLocatorResolver}s with weight-based ordering.
    */
-  private final NavigableSet<Weighted<? extends IReceiverLocatorResolver<? extends R>>> weightedReceiverLocatorResolvers = new TreeSet<>();
+  private final NavigableSet<Weighted<? extends IReceiverLocatorResolver<? extends R>>> weightedReceiverLocatorResolvers;
 
   /**
    * A map of types to navigable sets for iterating through the {@link IPlaceholderResolver}s with weight-based
    * ordering.
    */
-  private final Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers = new HashMap<>();
+  private final Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers;
 
   /**
    * All scanned methods of this proxy, excluding special-case methods such as {@code default} methods and any returning
    * {@link Moonshine}.
    */
-  private final Map<Method, MoonshineMethod<? extends R>> scannedMethods = new HashMap<>();
+  private final Map<Method, MoonshineMethod<? extends R>> scannedMethods;
 
-  /**
-   * An unmodifiable view of {@link #scannedMethods}, for use in returning without creating new instances of the view
-   * every single invocation.
-   */
-  private final Map<Method, MoonshineMethod<? extends R>> unmodifiableViewOfScannedMethods =
-      Collections.unmodifiableMap(this.scannedMethods);
-
-  public Moonshine(final TypeToken<?> proxiedType,
-      final MoonshineInvocationHandler<R, I, O, F> invocationHandler,
+  Moonshine(final TypeToken<?> proxiedType,
       final IPlaceholderResolverStrategy<R, I, F> placeholderResolverStrategy,
       final IMessageSource<R, I> messageSource,
       final IMessageRenderer<R, I, O, F> messageRenderer,
-      final IMessageSender<R, O> messageSender)
+      final IMessageSender<R, O> messageSender,
+      final NavigableSet<Weighted<? extends IReceiverLocatorResolver<? extends R>>> weightedReceiverLocatorResolvers,
+      final Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers)
       throws UnscannableMethodException {
     this.proxiedType = proxiedType;
-    this.invocationHandler = invocationHandler;
     this.placeholderResolverStrategy = placeholderResolverStrategy;
     this.messageSource = messageSource;
     this.messageRenderer = messageRenderer;
     this.messageSender = messageSender;
+    this.weightedReceiverLocatorResolvers = Collections.unmodifiableNavigableSet(weightedReceiverLocatorResolvers);
+    this.weightedPlaceholderResolvers = Collections.unmodifiableMap(weightedPlaceholderResolvers);
 
-    for (final Method method : GenericTypeReflector.erase(proxiedType.getType()).getMethods()) {
+    final Method[] methods = GenericTypeReflector.erase(proxiedType.getType()).getMethods();
+    final Map<Method, MoonshineMethod<? extends R>> scannedMethods = new HashMap<>(methods.length);
+    for (final Method method : methods) {
       if (method.isDefault() || method.getReturnType() == Moonshine.class) {
         continue;
       }
 
       final MoonshineMethod<? extends R> moonshineMethod =
           new MoonshineMethod<>(this, proxiedType, method);
-      this.scannedMethods.put(method, moonshineMethod);
+      scannedMethods.put(method, moonshineMethod);
     }
+    this.scannedMethods = Collections.unmodifiableMap(scannedMethods);
+
+    this.invocationHandler = new MoonshineInvocationHandler<>(this);
+  }
+
+  @SideEffectFree
+  public static <T, R> MoonshineBuilder.Receivers<T, R> builder(final TypeToken<T> proxiedType) {
+    return MoonshineBuilder.newBuilder(proxiedType);
   }
 
   /**
@@ -157,14 +161,14 @@ public final class Moonshine<R, I, O, F> {
    * @return an unmodifiable view of a navigable set for iterating through the available {@link
    * IReceiverLocatorResolver}s with weight-based ordering
    */
-  @SideEffectFree
+  @Pure
   public NavigableSet<Weighted<? extends IReceiverLocatorResolver<? extends R>>> weightedReceiverLocatorResolvers() {
-    return Collections.unmodifiableNavigableSet(this.weightedReceiverLocatorResolvers);
+    return this.weightedReceiverLocatorResolvers;
   }
 
   /**
-   * @return a map of types to navigable sets for iterating through the available {@link IPlaceholderResolver}s with
-   * weight-based ordering
+   * @return an unmodifiable view of a map of types to navigable sets for iterating through the available {@link
+   * IPlaceholderResolver}s with weight-based ordering
    */
   @Pure
   public Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers() {
@@ -175,7 +179,7 @@ public final class Moonshine<R, I, O, F> {
    * @return an unmodifiable view of all available scanned methods
    */
   public Map<Method, MoonshineMethod<? extends R>> scannedMethods() {
-    return this.unmodifiableViewOfScannedMethods;
+    return this.scannedMethods;
   }
 
   /**

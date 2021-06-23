@@ -18,6 +18,7 @@
 
 package net.kyori.moonshine.strategy;
 
+import com.google.common.collect.Iterators;
 import io.leangen.geantyref.GenericTypeReflector;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -59,7 +60,6 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
     }
 
     final Map<String, F> finalisedPlaceholders = new HashMap<>(parameters.length);
-    // resolvingPlaceholders will be cleared many times!
     final Map<String, ContinuanceValue<?>> resolvingPlaceholders = new HashMap<>(16);
     final Parameter[] methodParameters = moonshineMethod.reflectMethod().getParameters();
     final Type[] exactParameterTypes = GenericTypeReflector.getParameterTypes(
@@ -86,13 +86,11 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
       final String placeholderName = placeholder.value().isEmpty()
           ? parameter.getName()
           : placeholder.value();
-
-      resolvingPlaceholders.clear();
       resolvingPlaceholders.put(placeholderName, ContinuanceValue.continuanceValue(value, parameterType));
-
-      this.resolvePlaceholder(moonshine, receiver, finalisedPlaceholders,
-          resolvingPlaceholders, moonshineMethod, parameters);
     }
+
+    this.resolvePlaceholder(moonshine, receiver, finalisedPlaceholders,
+        resolvingPlaceholders, moonshineMethod, parameters);
 
     return finalisedPlaceholders;
   }
@@ -116,12 +114,14 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
     dancing:
     // Shamelessly stealing kashike's joke
     while (!resolvingPlaceholders.isEmpty()) {
-      for (final Entry<String, ContinuanceValue<?>> continuanceEntry : resolvingPlaceholders.entrySet()) {
+      final Iterator<Entry<String, ContinuanceValue<?>>> resolvingPlaceholderIterator = resolvingPlaceholders.entrySet().iterator();
+      while (resolvingPlaceholderIterator.hasNext()) {
+        final Entry<String, ContinuanceValue<?>> continuanceEntry = resolvingPlaceholderIterator.next();
         final String continuancePlaceholderName = continuanceEntry.getKey();
         final Type type = continuanceEntry.getValue().type();
         final Object value = continuanceEntry.getValue().value();
 
-        final Iterator<Type> hierarchyIterator = this.supertypeStrategy.hierarchyIterator(type);
+        final Iterator<Type> hierarchyIterator = Iterators.concat(Iterators.singletonIterator(type), this.supertypeStrategy.hierarchyIterator(type));
         while (hierarchyIterator.hasNext()) {
           final Type supertype = hierarchyIterator.next();
 
@@ -140,6 +140,8 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
               // The resolver did not want to resolve this; pass it on.
               continue;
             }
+
+            resolvingPlaceholderIterator.remove();
 
             resolverResult.forEach((resolvedName, resolvedValue) ->
                 resolvedValue.map(conclusionValue -> finalisedPlaceholders.put(resolvedName, conclusionValue.value()),
