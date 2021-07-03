@@ -105,7 +105,7 @@ allprojects {
     }
 
     checkstyle {
-        toolVersion = "8.43"
+        toolVersion = "8.44"
         val configRoot = rootProject.projectDir.resolve(".checkstyle")
         configDirectory.set(configRoot)
         configProperties["basedir"] = configRoot.absolutePath
