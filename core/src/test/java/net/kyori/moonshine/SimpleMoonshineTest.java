@@ -21,18 +21,29 @@ package net.kyori.moonshine;
 import static java.util.Collections.emptyMap;
 import static net.kyori.moonshine.Unit.UNIT;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.leangen.geantyref.TypeToken;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import net.kyori.moonshine.annotation.Message;
+import net.kyori.moonshine.annotation.Placeholder;
 import net.kyori.moonshine.message.IMessageRenderer;
 import net.kyori.moonshine.message.IMessageSender;
 import net.kyori.moonshine.message.IMessageSource;
 import net.kyori.moonshine.model.MoonshineMethod;
+import net.kyori.moonshine.placeholder.ConclusionValue;
 import net.kyori.moonshine.strategy.IPlaceholderResolverStrategy;
+import net.kyori.moonshine.strategy.StandardPlaceholderResolverStrategy;
+import net.kyori.moonshine.strategy.supertype.StandardSupertypeThenInterfaceSupertypeStrategy;
+import net.kyori.moonshine.util.Either;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,10 +70,10 @@ class SimpleMoonshineTest {
   @SuppressWarnings("unchecked")
   @Test
   void singleEmptyMethod() throws Exception {
-    final IMessageSource<Unit, Unit> source = mock(IMessageSource.class);
+    final IMessageSource<Unit, Unit> messageSource = mock(IMessageSource.class);
     final IMessageRenderer<Unit, Unit, Unit, Unit> messageRenderer = mock(IMessageRenderer.class);
     final IMessageSender<Unit, Unit> messageSender = mock(IMessageSender.class);
-    when(source.messageOf(any(), any())).thenReturn(UNIT);
+    when(messageSource.messageOf(any(), any())).thenReturn(UNIT);
     when(messageRenderer.render(any(), any(), any(), any(), any())).thenReturn(UNIT);
 
     assertThatCode(() ->
@@ -70,13 +81,53 @@ class SimpleMoonshineTest {
             TypeToken.get(SingleEmptyMethodMoonshineType.class))
             .receiverLocatorResolver((method, proxy) -> (method1, proxy1, parameters) -> UNIT,
                 2)
-            .sourced(source)
+            .sourced(messageSource)
             .rendered(messageRenderer)
             .sent(messageSender)
             .resolvingWithStrategy(new EmptyResolvingStrategy<>())
             .create()
             .method()
     ).doesNotThrowAnyException();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void singleMethodStringPlaceholders() throws Exception {
+    final IMessageSource<TestableReceiver, String> messageSource = mock(IMessageSource.class);
+    final IMessageRenderer<TestableReceiver, String, String, String> messageRenderer = spy(
+        new SimpleStringFormatRenderer<>());
+    final IMessageSender<TestableReceiver, String> messageSender = mock(IMessageSender.class);
+    final TestableReceiver receiver = mock(TestableReceiver.class);
+    when(messageSource.messageOf(any(), any())).thenReturn("Hello, %2$s!");
+
+    assertThatCode(() ->
+        Moonshine.<SingleMethodStringPlaceholdersMoonshineType, TestableReceiver>builder(
+            TypeToken.get(SingleMethodStringPlaceholdersMoonshineType.class))
+            .receiverLocatorResolver((method, proxy) -> (method1, proxy1, parameters) -> receiver,
+                -1)
+            .sourced(messageSource)
+            .rendered(messageRenderer)
+            .sent(messageSender)
+            .resolvingWithStrategy(new StandardPlaceholderResolverStrategy<>(
+                new StandardSupertypeThenInterfaceSupertypeStrategy(false)))
+            .weightedPlaceholderResolver(String.class,
+                (placeholderName, value, receiver1, owner, method, parameters) -> null,
+                3)
+            .weightedPlaceholderResolver(String.class,
+                (placeholderName, value, receiver1, owner, method, parameters) ->
+                    Map.of(placeholderName, Either.left(ConclusionValue.conclusionValue(value))),
+                1)
+            .create()
+            .method(receiver, "first", "second")
+    ).doesNotThrowAnyException();
+
+    verify(messageSource).messageOf(receiver, "test");
+    verify(messageRenderer).render(receiver, "Hello, %2$s!",
+        new LinkedHashMap<>(Map.of("placeholder", "first", "cringe", "second")),
+        SingleMethodStringPlaceholdersMoonshineType.class.getMethod(
+            "method", TestableReceiver.class, String.class, String.class),
+        TypeToken.get(SingleMethodStringPlaceholdersMoonshineType.class).getType());
+    verify(messageSender).send(receiver, "Hello, second!");
   }
 
   interface EmptyMoonshineType {
@@ -87,6 +138,21 @@ class SimpleMoonshineTest {
     void method();
   }
 
+  interface SingleMethodStringPlaceholdersMoonshineType {
+    @Message("test")
+    void method(
+        final TestableReceiver receiver,
+        @Placeholder final String placeholder,
+        @Placeholder("cringe") final String placeholder2
+    );
+  }
+
+  class TestableReceiver {
+    void send(final Object message) {
+      fail("TestableReceiver#send must be mocked");
+    }
+  }
+
   private static class EmptyResolvingStrategy<R, I, F> implements
       IPlaceholderResolverStrategy<R, I, F> {
     @Override
@@ -95,6 +161,16 @@ class SimpleMoonshineTest {
         final MoonshineMethod<? extends R> moonshineMethod,
         final @Nullable Object[] parameters) {
       return emptyMap();
+    }
+  }
+
+  private static class SimpleStringFormatRenderer<R> implements
+      IMessageRenderer<R, String, String, String> {
+    @Override
+    public String render(final R receiver, final String intermediateMessage,
+        final Map<String, ? extends String> resolvedPlaceholders, final Method method,
+        final Type owner) {
+      return String.format(intermediateMessage, resolvedPlaceholders.values().toArray());
     }
   }
 }

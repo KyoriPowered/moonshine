@@ -120,6 +120,8 @@ allprojects {
 
         compileTestJava {
             options.compilerArgs.add("-parameters")
+            sourceCompatibility = "11"
+            targetCompatibility = sourceCompatibility
         }
     }
 

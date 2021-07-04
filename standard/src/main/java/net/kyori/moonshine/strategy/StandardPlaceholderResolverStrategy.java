@@ -23,8 +23,8 @@ import io.leangen.geantyref.GenericTypeReflector;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -43,7 +43,8 @@ import net.kyori.moonshine.util.Weighted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ThreadSafe
-public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlaceholderResolverStrategy<R, I, F> {
+public final class StandardPlaceholderResolverStrategy<R, I, F> implements
+    IPlaceholderResolverStrategy<R, I, F> {
   private final ISupertypeStrategy supertypeStrategy;
 
   public StandardPlaceholderResolverStrategy(final ISupertypeStrategy supertypeStrategy) {
@@ -52,15 +53,16 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
 
   @Override
   public Map<String, ? extends F> resolvePlaceholders(final Moonshine<R, I, ?, F> moonshine,
-      final R receiver, final I intermediateText, final MoonshineMethod<? extends R> moonshineMethod,
+      final R receiver, final I intermediateText,
+      final MoonshineMethod<? extends R> moonshineMethod,
       final @Nullable Object[] parameters)
       throws PlaceholderResolvingException {
     if (parameters.length == 0) {
       return Collections.emptyMap();
     }
 
-    final Map<String, F> finalisedPlaceholders = new HashMap<>(parameters.length);
-    final Map<String, ContinuanceValue<?>> resolvingPlaceholders = new HashMap<>(16);
+    final Map<String, F> finalisedPlaceholders = new LinkedHashMap<>(parameters.length);
+    final Map<String, ContinuanceValue<?>> resolvingPlaceholders = new LinkedHashMap<>(16);
     final Parameter[] methodParameters = moonshineMethod.reflectMethod().getParameters();
     final Type[] exactParameterTypes = GenericTypeReflector.getParameterTypes(
         moonshineMethod.reflectMethod(), moonshine.proxiedType().getType());
@@ -86,7 +88,8 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
       final String placeholderName = placeholder.value().isEmpty()
           ? parameter.getName()
           : placeholder.value();
-      resolvingPlaceholders.put(placeholderName, ContinuanceValue.continuanceValue(value, parameterType));
+      resolvingPlaceholders
+          .put(placeholderName, ContinuanceValue.continuanceValue(value, parameterType));
     }
 
     this.resolvePlaceholder(moonshine, receiver, finalisedPlaceholders,
@@ -111,22 +114,26 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
     final Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers =
         moonshine.weightedPlaceholderResolvers();
 
-    dancing:
     // Shamelessly stealing kashike's joke
+    dancing:
     while (!resolvingPlaceholders.isEmpty()) {
-      final Iterator<Entry<String, ContinuanceValue<?>>> resolvingPlaceholderIterator = resolvingPlaceholders.entrySet().iterator();
+      final Iterator<Entry<String, ContinuanceValue<?>>> resolvingPlaceholderIterator = resolvingPlaceholders
+          .entrySet().iterator();
       while (resolvingPlaceholderIterator.hasNext()) {
-        final Entry<String, ContinuanceValue<?>> continuanceEntry = resolvingPlaceholderIterator.next();
+        final Entry<String, ContinuanceValue<?>> continuanceEntry = resolvingPlaceholderIterator
+            .next();
         final String continuancePlaceholderName = continuanceEntry.getKey();
         final Type type = continuanceEntry.getValue().type();
         final Object value = continuanceEntry.getValue().value();
 
-        final Iterator<Type> hierarchyIterator = Iterators.concat(Iterators.singletonIterator(type), this.supertypeStrategy.hierarchyIterator(type));
+        final Iterator<Type> hierarchyIterator = Iterators.concat(Iterators.singletonIterator(type),
+            this.supertypeStrategy.hierarchyIterator(type));
         while (hierarchyIterator.hasNext()) {
           final Type supertype = hierarchyIterator.next();
 
           for (final Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>> weighted :
-              weightedPlaceholderResolvers.getOrDefault(supertype, Collections.emptyNavigableSet())) {
+              weightedPlaceholderResolvers
+                  .getOrDefault(supertype, Collections.emptyNavigableSet())) {
             @SuppressWarnings("unchecked") // This should be equivalent.
             final IPlaceholderResolver<R, Object, ? extends F> placeholderResolver =
                 (IPlaceholderResolver<R, Object, ? extends F>) weighted.value();
@@ -134,7 +141,8 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
             @SuppressWarnings({"unchecked", "RedundantCast"}) // This should be equivalent.
             @Nullable final Map<String, Either<ConclusionValue<? extends F>, ContinuanceValue<?>>> resolverResult =
                 (Map<String, Either<ConclusionValue<? extends F>, ContinuanceValue<?>>>) (Map<String, ?>) placeholderResolver
-                    .resolve(continuancePlaceholderName, value, receiver, moonshineMethod.owner().getType(),
+                    .resolve(continuancePlaceholderName, value, receiver,
+                        moonshineMethod.owner().getType(),
                         moonshineMethod.reflectMethod(), parameters);
             if (resolverResult == null) {
               // The resolver did not want to resolve this; pass it on.
@@ -144,13 +152,15 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements IPlac
             resolvingPlaceholderIterator.remove();
 
             resolverResult.forEach((resolvedName, resolvedValue) ->
-                resolvedValue.map(conclusionValue -> finalisedPlaceholders.put(resolvedName, conclusionValue.value()),
+                resolvedValue.map(conclusionValue -> finalisedPlaceholders
+                        .put(resolvedName, conclusionValue.value()),
                     continuanceValue -> resolvingPlaceholders.put(resolvedName, continuanceValue)));
 
             continue dancing;
           }
 
-          throw new UnfinishedPlaceholderException(moonshineMethod, continuancePlaceholderName, value);
+          throw new UnfinishedPlaceholderException(moonshineMethod, continuancePlaceholderName,
+              value);
         }
       }
     }
