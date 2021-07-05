@@ -40,6 +40,7 @@ import net.kyori.moonshine.message.IMessageSender;
 import net.kyori.moonshine.message.IMessageSource;
 import net.kyori.moonshine.model.MoonshineMethod;
 import net.kyori.moonshine.placeholder.ConclusionValue;
+import net.kyori.moonshine.placeholder.ContinuanceValue;
 import net.kyori.moonshine.strategy.IPlaceholderResolverStrategy;
 import net.kyori.moonshine.strategy.StandardPlaceholderResolverStrategy;
 import net.kyori.moonshine.strategy.supertype.StandardSupertypeThenInterfaceSupertypeStrategy;
@@ -117,15 +118,19 @@ class SimpleMoonshineTest {
                 (placeholderName, value, receiver1, owner, method, parameters) ->
                     Map.of(placeholderName, Either.left(ConclusionValue.conclusionValue(value))),
                 1)
+            .weightedPlaceholderResolver(TypeToken.get(StringPlaceholderValue.class),
+                (placeholderName, value, receiver1, owner, method, parameters) ->
+                    Map.of(placeholderName, Either.right(
+                        ContinuanceValue.continuanceValue(value.value(), String.class))),
+                1)
             .create()
-            .method(receiver, "first", "second")
+            .method(receiver, "first", new SimpleStringPlaceholder("second"))
     ).doesNotThrowAnyException();
 
     verify(messageSource).messageOf(receiver, "test");
     verify(messageRenderer).render(receiver, "Hello, %2$s!",
         new LinkedHashMap<>(Map.of("placeholder", "first", "cringe", "second")),
-        SingleMethodStringPlaceholdersMoonshineType.class.getMethod(
-            "method", TestableReceiver.class, String.class, String.class),
+        SingleMethodStringPlaceholdersMoonshineType.class.getMethods()[0],
         TypeToken.get(SingleMethodStringPlaceholdersMoonshineType.class).getType());
     verify(messageSender).send(receiver, "Hello, second!");
   }
@@ -143,11 +148,11 @@ class SimpleMoonshineTest {
     void method(
         final TestableReceiver receiver,
         @Placeholder final String placeholder,
-        @Placeholder("cringe") final String placeholder2
+        @Placeholder("cringe") final SimpleStringPlaceholder placeholder2
     );
   }
 
-  class TestableReceiver {
+  private static class TestableReceiver {
     void send(final Object message) {
       fail("TestableReceiver#send must be mocked");
     }
@@ -171,6 +176,23 @@ class SimpleMoonshineTest {
         final Map<String, ? extends String> resolvedPlaceholders, final Method method,
         final Type owner) {
       return String.format(intermediateMessage, resolvedPlaceholders.values().toArray());
+    }
+  }
+
+  private interface StringPlaceholderValue {
+    String value();
+  }
+
+  private static class SimpleStringPlaceholder implements StringPlaceholderValue {
+    private final String value;
+
+    private SimpleStringPlaceholder(final String value) {
+      this.value = value;
+    }
+
+    @Override
+    public String value() {
+      return this.value;
     }
   }
 }

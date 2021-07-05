@@ -158,10 +158,10 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
 
             continue dancing;
           }
-
-          throw new UnfinishedPlaceholderException(moonshineMethod, continuancePlaceholderName,
-              value);
         }
+
+        throw new UnfinishedPlaceholderException(moonshineMethod, continuancePlaceholderName,
+            value);
       }
     }
   }
