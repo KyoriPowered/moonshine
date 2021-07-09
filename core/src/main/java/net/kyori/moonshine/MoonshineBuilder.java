@@ -225,7 +225,7 @@ public final class MoonshineBuilder {
       return this.create(Thread.currentThread().getContextClassLoader());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // Proxy returns Object; we expect T which is provided in #proxiedType.
     @SideEffectFree
     public T create(final ClassLoader classLoader) throws UnscannableMethodException {
       final Moonshine<R, I, O, F> moonshine = new Moonshine<>(this.proxiedType, this.placeholderResolverStrategy,
