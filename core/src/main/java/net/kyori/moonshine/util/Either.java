@@ -39,7 +39,7 @@ public final class Either<L, R> {
   private final @Nullable R right;
 
   private Either(final @Nullable L left, final @Nullable R right) {
-    if (left == null && right == null) {
+    if ((left == null) == (right == null)) {
       throw new IllegalArgumentException("must be either left or right");
     }
 
@@ -103,18 +103,19 @@ public final class Either<L, R> {
     }
   }
 
-  @SuppressWarnings("ConstantConditions") // Either must be non-null
   @Pure
   public void map(final Consumer<L> leftConsumer, final Consumer<R> rightConsumer) {
     if (this.leftRaw() != null) {
       leftConsumer.accept(this.leftRaw());
-    } else {
+    } else if (this.rightRaw() != null) {
       rightConsumer.accept(this.rightRaw());
+    } else {
+      throw new IllegalStateException("either left or right must be non-null");
     }
   }
 
-  @Override
   @Pure
+  @Override
   public boolean equals(final @Nullable Object other) {
     if (!(other instanceof Either)) {
       return false;
@@ -125,11 +126,16 @@ public final class Either<L, R> {
         && Objects.equals(otherEither.rightRaw(), this.rightRaw());
   }
 
-  @SuppressWarnings("ConstantConditions") // Either must be non-null
   @Pure
   @Override
   public int hashCode() {
-    return this.isLeft() ? this.leftRaw().hashCode() : this.rightRaw().hashCode();
+    if (this.isLeft()) {
+      return this.leftRaw().hashCode();
+    } else if (this.isRight()) {
+      return this.rightRaw().hashCode();
+    } else {
+      throw new IllegalStateException("either left or right must be non-null");
+    }
   }
 
   @Override
