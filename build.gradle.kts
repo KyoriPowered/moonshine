@@ -40,7 +40,6 @@ subprojects {
     }
 
     tasks {
-        val jacocoTestReport by getting(JacocoReport::class)
         test {
             useJUnitPlatform()
             dependsOn(checkstyleMain, checkstyleTest)
@@ -55,7 +54,8 @@ subprojects {
             dependsOn(test)
             reports {
                 xml.required.set(true)
-                html.required.set(false)
+                html.required.set(true)
+                csv.required.set(false)
             }
         }
 
@@ -147,6 +147,29 @@ allprojects {
                     password = proxiPassword
                 }
             }
+        }
+    }
+}
+
+tasks {
+    test {
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(allprojects.map { it.tasks.test })
+
+        additionalSourceDirs(files(subprojects.map { it.sourceSets.main.get().allSource.srcDirs }))
+        additionalClassDirs(files(subprojects.map { it.sourceSets.main.get().output }))
+        executionData.setFrom(files(
+            subprojects.flatMap { it.tasks.jacocoTestReport.map { it.executionData }.get() }
+                .filter { it.exists() }
+        ))
+
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+            csv.required.set(false)
         }
     }
 }
