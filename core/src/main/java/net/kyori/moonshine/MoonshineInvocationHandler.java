@@ -42,7 +42,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <F> the finalised placeholder type, post-resolving
  */
 @ThreadSafe
-final class MoonshineInvocationHandler<R, I, O, F> implements InvocationHandler {
+/* package-private */ final class MoonshineInvocationHandler<R, I, O, F> implements InvocationHandler {
   /**
    * An empty array to substitute a state of missing method arguments.
    */
