@@ -47,10 +47,7 @@ import net.kyori.moonshine.strategy.supertype.StandardSupertypeThenInterfaceSupe
 import net.kyori.moonshine.util.Either;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class SimpleMoonshineTest {
   @Test
   void emptyMoonshineInstance() {
