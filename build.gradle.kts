@@ -92,7 +92,6 @@ allprojects {
         header = rootProject.file("LICENCE-HEADER")
         ext["year"] = Calendar.getInstance().get(Calendar.YEAR)
         include("**/*.java")
-        include("**/*.kt")
 
         mapping("java", "DOUBLESLASH_STYLE")
     }
