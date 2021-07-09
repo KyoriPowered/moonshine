@@ -32,7 +32,7 @@ subprojects {
 
     dependencies {
         api("com.google.guava:guava:30.1-jre")
-        api("io.leangen.geantyref:geantyref:1.3.4")
+        api("io.leangen.geantyref:geantyref:1.3.11")
 
         testImplementation("org.junit.jupiter:junit-jupiter:5.+")
         testImplementation("org.assertj:assertj-core:3.+")
