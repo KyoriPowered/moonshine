@@ -27,11 +27,12 @@ import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class StandardSupertypeThenInterfaceSupertypeStrategyTest {
+/* package-private */ class StandardSupertypeThenInterfaceSupertypeStrategyTest {
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
   void simpleSupertypes(final boolean returnObject) {
-    final ISupertypeStrategy strategy = new StandardSupertypeThenInterfaceSupertypeStrategy(returnObject);
+    final ISupertypeStrategy strategy = new StandardSupertypeThenInterfaceSupertypeStrategy(
+        returnObject);
     final Iterator<Type> supertypeIterator = strategy.hierarchyIterator(SimpleSubtypeB.class);
 
     assertThat(supertypeIterator.next()).isEqualTo(SimpleSubtypeA.class);
@@ -42,31 +43,34 @@ class StandardSupertypeThenInterfaceSupertypeStrategyTest {
     assertThat(supertypeIterator.hasNext()).isFalse();
   }
 
-  class SimpleSupertype {
+  /* package-private */ class SimpleSupertype {
   }
 
-  class SimpleSubtypeA extends SimpleSupertype {
+  /* package-private */ class SimpleSubtypeA extends SimpleSupertype {
   }
 
-  class SimpleSubtypeB extends SimpleSubtypeA {
+  /* package-private */ class SimpleSubtypeB extends SimpleSubtypeA {
   }
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
   void simpleIdealCase(final boolean returnObject) {
-    final ISupertypeStrategy strategy = new StandardSupertypeThenInterfaceSupertypeStrategy(returnObject);
+    final ISupertypeStrategy strategy = new StandardSupertypeThenInterfaceSupertypeStrategy(
+        returnObject);
     final Iterator<Type> supertypeIterator = strategy
         .hierarchyIterator(new TypeToken<SimpleIdealCaseSubSubtype<List<Integer>>>() {
         }.getType());
 
-    assertThat(supertypeIterator.next()).isEqualTo(new TypeToken<SimpleIdealCaseSubtype<List<Integer>>>() {
-    }.getType());
+    assertThat(supertypeIterator.next())
+        .isEqualTo(new TypeToken<SimpleIdealCaseSubtype<List<Integer>>>() {
+        }.getType());
     assertThat(supertypeIterator.next()).isEqualTo(SimpleIdealCaseSuperType.class);
     if (returnObject) {
       assertThat(supertypeIterator.next()).isEqualTo(Object.class);
     }
-    assertThat(supertypeIterator.next()).isEqualTo(new TypeToken<SimpleIdealCaseInterfaceShared<List<Integer>>>() {
-    }.getType());
+    assertThat(supertypeIterator.next())
+        .isEqualTo(new TypeToken<SimpleIdealCaseInterfaceShared<List<Integer>>>() {
+        }.getType());
     assertThat(supertypeIterator.next()).isEqualTo(SimpleIdealCaseInterfaceSharedSuper.class);
     assertThat(supertypeIterator.next()).isEqualTo(SimpleIdealCaseSuperTypeInterfaceA.class);
     assertThat(supertypeIterator.next()).isEqualTo(SimpleIdealCaseSuperTypeInterfaceB.class);
@@ -78,44 +82,49 @@ class StandardSupertypeThenInterfaceSupertypeStrategyTest {
     assertThat(supertypeIterator.hasNext()).isFalse();
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceA extends SimpleIdealCaseSuperTypeInterfaceAA,
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceA extends
+      SimpleIdealCaseSuperTypeInterfaceAA,
       SimpleIdealCaseSuperTypeInterfaceAB, SimpleIdealCaseSuperTypeInterfaceShared {
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceB extends SimpleIdealCaseSuperTypeInterfaceBA,
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceB extends
+      SimpleIdealCaseSuperTypeInterfaceBA,
       SimpleIdealCaseSuperTypeInterfaceShared {
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceShared {
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceShared {
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceAA extends SimpleIdealCaseSuperTypeInterfaceAAA {
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceAA extends
+      SimpleIdealCaseSuperTypeInterfaceAAA {
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceAAA {
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceAAA {
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceAB {
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceAB {
   }
 
-  interface SimpleIdealCaseSuperTypeInterfaceBA {
+  /* package-private */ interface SimpleIdealCaseSuperTypeInterfaceBA {
   }
 
-  interface SimpleIdealCaseInterfaceShared<T> extends SimpleIdealCaseInterfaceSharedSuper {
+  /* package-private */ interface SimpleIdealCaseInterfaceShared<T> extends
+      SimpleIdealCaseInterfaceSharedSuper {
   }
 
-  interface SimpleIdealCaseInterfaceSharedSuper {
+  /* package-private */ interface SimpleIdealCaseInterfaceSharedSuper {
   }
 
-  abstract class SimpleIdealCaseSuperType implements SimpleIdealCaseSuperTypeInterfaceA,
+  /* package-private */ abstract class SimpleIdealCaseSuperType implements
+      SimpleIdealCaseSuperTypeInterfaceA,
       SimpleIdealCaseSuperTypeInterfaceB {
   }
 
-  class SimpleIdealCaseSubtype<T> extends SimpleIdealCaseSuperType
+  /* package-private */ class SimpleIdealCaseSubtype<T> extends SimpleIdealCaseSuperType
       implements SimpleIdealCaseInterfaceShared<T> {
   }
 
-  class SimpleIdealCaseSubSubtype<T> extends SimpleIdealCaseSubtype<T>
+  /* package-private */ class SimpleIdealCaseSubSubtype<T> extends SimpleIdealCaseSubtype<T>
       implements SimpleIdealCaseInterfaceShared<T> {
   }
 }

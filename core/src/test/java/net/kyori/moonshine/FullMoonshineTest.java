@@ -53,7 +53,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
-class FullMoonshineTest {
+/* package-private */ class FullMoonshineTest {
   @Test
   void fullyFledgedMoonshineInstance() throws Exception {
     final MockedReceiver receiver = mock(MockedReceiver.class);
@@ -91,7 +91,7 @@ class FullMoonshineTest {
             + email.examine(StringExaminer.simpleEscaping()));
   }
 
-  interface MoonshineType {
+  /* package-private */ interface MoonshineType {
     TypeToken<MoonshineType> TYPE_TOKEN = new TypeToken<>() {
     };
 
@@ -104,10 +104,11 @@ class FullMoonshineTest {
 
   @Target({ElementType.PARAMETER, ElementType.TYPE_USE})
   @Retention(RetentionPolicy.RUNTIME)
-  @interface Receive {
+      /* package-private */ @interface Receive {
   }
 
-  static class ReceiverLocatorResolver implements IReceiverLocatorResolver<Receiver> {
+  /* package-private */ static class ReceiverLocatorResolver implements
+      IReceiverLocatorResolver<Receiver> {
     @Override
     public @Nullable IReceiverLocator<Receiver> resolve(final Method method, final Type proxy) {
       final Parameter[] parameters = method.getParameters();
@@ -124,18 +125,19 @@ class FullMoonshineTest {
     }
   }
 
-  interface Receiver {
+  /* package-private */ interface Receiver {
     void sendMessage(final String message);
   }
 
-  static class MockedReceiver implements Receiver {
+  /* package-private */ static class MockedReceiver implements Receiver {
     @Override
     public void sendMessage(final String message) {
       fail("must be mocked; got message: " + message);
     }
   }
 
-  static class StringPlaceholderResolver<R> implements IPlaceholderResolver<R, String, String> {
+  /* package-private */ static class StringPlaceholderResolver<R> implements
+      IPlaceholderResolver<R, String, String> {
     @Override
     public @Nullable Map<String, Either<ConclusionValue<? extends String>, ContinuanceValue<?>>> resolve(
         final String placeholderName, final String value, final R receiver, final Type owner,
@@ -144,7 +146,7 @@ class FullMoonshineTest {
     }
   }
 
-  interface Mail extends Examinable {
+  /* package-private */ interface Mail extends Examinable {
     String author();
 
     String title();
@@ -162,7 +164,7 @@ class FullMoonshineTest {
     }
   }
 
-  static class Email implements Mail {
+  /* package-private */ static class Email implements Mail {
     private final String author;
     private final String title;
     private final String body;
@@ -189,7 +191,8 @@ class FullMoonshineTest {
     }
   }
 
-  static class MailPlaceholderResolver<R> implements IPlaceholderResolver<R, Mail, String> {
+  /* package-private */ static class MailPlaceholderResolver<R> implements
+      IPlaceholderResolver<R, Mail, String> {
     @Override
     public @Nullable Map<String, Either<ConclusionValue<? extends String>, ContinuanceValue<?>>> resolve(
         final String placeholderName, final Mail value, final R receiver, final Type owner,

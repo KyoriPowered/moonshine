@@ -48,7 +48,7 @@ import net.kyori.moonshine.util.Either;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
-class SimpleMoonshineTest {
+/* package-private */ class SimpleMoonshineTest {
   @Test
   void emptyMoonshineInstance() {
     assertThatCode(() ->
