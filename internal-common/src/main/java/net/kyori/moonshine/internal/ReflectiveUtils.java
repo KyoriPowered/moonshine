@@ -22,7 +22,9 @@ import io.leangen.geantyref.GenericTypeReflector;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * Utilities for handling reflective operations.
@@ -55,11 +57,9 @@ public final class ReflectiveUtils {
       return "";
     }
 
-    final StringJoiner joiner = new StringJoiner(", ");
-    for (final Type genericParameterType : method.getGenericParameterTypes()) {
-      joiner.add(GenericTypeReflector.getTypeName(genericParameterType));
-    }
-    return joiner.toString();
+    return Arrays.stream(method.getGenericParameterTypes())
+        .map(GenericTypeReflector::getTypeName)
+        .collect(Collectors.joining(", "));
   }
 
   private static String formatMethodTypeParameters(final Method method) {
@@ -68,10 +68,8 @@ public final class ReflectiveUtils {
       return "";
     }
 
-    final StringJoiner joiner = new StringJoiner(", ", "<", ">");
-    for (final TypeVariable<Method> typeParameter : typeParameters) {
-      joiner.add(GenericTypeReflector.getTypeName(typeParameter));
-    }
-    return joiner.toString();
+    return Arrays.stream(typeParameters)
+        .map(GenericTypeReflector::getTypeName)
+        .collect(Collectors.joining(", ", "<", ">"));
   }
 }
