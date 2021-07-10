@@ -18,9 +18,9 @@
 
 package net.kyori.moonshine.exception.scan;
 
-import net.kyori.moonshine.exception.MoonshineException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import net.kyori.moonshine.exception.MoonshineException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 

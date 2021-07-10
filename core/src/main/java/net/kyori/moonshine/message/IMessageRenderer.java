@@ -21,7 +21,7 @@ package net.kyori.moonshine.message;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Map;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 
 /**
  * A rendered of intermediate messages with resolved placeholders for a given receiver.

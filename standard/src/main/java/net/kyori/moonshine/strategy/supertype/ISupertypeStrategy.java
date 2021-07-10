@@ -20,7 +20,7 @@ package net.kyori.moonshine.strategy.supertype;
 
 import java.lang.reflect.Type;
 import java.util.Iterator;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 
 /**
  * A strategy to select supertypes of a given type.

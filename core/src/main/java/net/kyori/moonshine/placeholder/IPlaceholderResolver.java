@@ -21,7 +21,7 @@ package net.kyori.moonshine.placeholder;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Map;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.util.Either;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

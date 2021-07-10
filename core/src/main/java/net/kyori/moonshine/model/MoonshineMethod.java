@@ -18,19 +18,19 @@
 
 package net.kyori.moonshine.model;
 
-import net.kyori.moonshine.annotation.Message;
-import net.kyori.moonshine.exception.scan.MissingMessageAnnotationException;
-import net.kyori.moonshine.exception.scan.NoReceiverLocatorFoundException;
-import net.kyori.moonshine.exception.scan.UnscannableMethodException;
-import net.kyori.moonshine.receiver.IReceiverLocator;
-import net.kyori.moonshine.receiver.IReceiverLocatorResolver;
-import net.kyori.moonshine.util.Weighted;
-import net.kyori.moonshine.Moonshine;
-import net.kyori.moonshine.message.IMessageSource;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.Moonshine;
+import net.kyori.moonshine.annotation.Message;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
+import net.kyori.moonshine.exception.scan.MissingMessageAnnotationException;
+import net.kyori.moonshine.exception.scan.NoReceiverLocatorFoundException;
+import net.kyori.moonshine.exception.scan.UnscannableMethodException;
+import net.kyori.moonshine.message.IMessageSource;
+import net.kyori.moonshine.receiver.IReceiverLocator;
+import net.kyori.moonshine.receiver.IReceiverLocatorResolver;
+import net.kyori.moonshine.util.Weighted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 

@@ -18,10 +18,10 @@
 
 package net.kyori.moonshine.exception.scan;
 
-import net.kyori.moonshine.Moonshine;
-import net.kyori.moonshine.internal.ReflectiveUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import net.kyori.moonshine.Moonshine;
+import net.kyori.moonshine.internal.ReflectiveUtils;
 
 /**
  * A method was declared in the interface to return {@link Moonshine}, but is not a legal definition.

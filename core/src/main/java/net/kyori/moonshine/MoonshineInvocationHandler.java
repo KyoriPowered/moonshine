@@ -18,11 +18,6 @@
 
 package net.kyori.moonshine;
 
-import net.kyori.moonshine.exception.MissingMoonshineMethodMappingException;
-import net.kyori.moonshine.model.MoonshineMethod;
-import net.kyori.moonshine.internal.IFindMethod;
-import net.kyori.moonshine.internal.jre8.Java8FindMethod;
-import net.kyori.moonshine.internal.jre9.Java9FindMethod;
 import io.leangen.geantyref.GenericTypeReflector;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationHandler;
@@ -31,7 +26,12 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
+import net.kyori.moonshine.exception.MissingMoonshineMethodMappingException;
+import net.kyori.moonshine.internal.IFindMethod;
+import net.kyori.moonshine.internal.jre8.Java8FindMethod;
+import net.kyori.moonshine.internal.jre9.Java9FindMethod;
+import net.kyori.moonshine.model.MoonshineMethod;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -113,8 +113,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
     final R receiver = moonshineMethod.receiverLocator().locate(method, proxy, args);
     final I intermediateMessage = this.moonshine.messageSource().messageOf(receiver, moonshineMethod.messageKey());
-    final Map<String, ? extends F> resolvedPlaceholders = this.moonshine.placeholderResolverStrategy().resolvePlaceholders(
-        this.moonshine, receiver, intermediateMessage, moonshineMethod, args);
+    final Map<String, ? extends F> resolvedPlaceholders = this.moonshine.placeholderResolverStrategy()
+        .resolvePlaceholders(
+            this.moonshine, receiver, intermediateMessage, moonshineMethod, args);
     final O renderedMessage = this.moonshine.messageRenderer().render(receiver, intermediateMessage,
         resolvedPlaceholders, method, this.moonshine.proxiedType().getType());
 

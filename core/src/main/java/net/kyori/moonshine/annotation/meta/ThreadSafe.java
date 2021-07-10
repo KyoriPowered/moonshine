@@ -16,16 +16,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package net.kyori.moonshine.exception.scan;
+package net.kyori.moonshine.annotation.meta;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import net.kyori.moonshine.internal.ReflectiveUtils;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public final class NoReceiverLocatorFoundException extends UnscannableMethodException {
-  public NoReceiverLocatorFoundException(final Type owner, final Method method) {
-    super(owner, method,
-        "No IReceiverLocator could be found for the following method: "
-            + ReflectiveUtils.formatMethodName(owner, method));
-  }
+/**
+ * The annotated element is explicitly thread-safe for its valid states.
+ */
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface ThreadSafe {
 }

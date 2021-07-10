@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
-import javax.annotation.concurrent.NotThreadSafe;
+import net.kyori.moonshine.annotation.meta.NotThreadSafe;
 import net.kyori.moonshine.exception.scan.UnscannableMethodException;
 import net.kyori.moonshine.message.IMessageRenderer;
 import net.kyori.moonshine.message.IMessageSender;

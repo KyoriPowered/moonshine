@@ -20,7 +20,7 @@ package net.kyori.moonshine.receiver;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

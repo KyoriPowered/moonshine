@@ -18,10 +18,10 @@
 
 package net.kyori.moonshine.exception.scan;
 
-import net.kyori.moonshine.annotation.Message;
-import net.kyori.moonshine.internal.ReflectiveUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import net.kyori.moonshine.annotation.Message;
+import net.kyori.moonshine.internal.ReflectiveUtils;
 
 /**
  * A method was not {@link Method#isDefault() a default method}, yet had no {@link Message} annotation.
