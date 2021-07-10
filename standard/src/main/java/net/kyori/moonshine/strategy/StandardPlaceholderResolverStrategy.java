@@ -27,15 +27,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import net.kyori.moonshine.Moonshine;
 import net.kyori.moonshine.annotation.Placeholder;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.PlaceholderResolvingException;
 import net.kyori.moonshine.exception.UnfinishedPlaceholderException;
+import net.kyori.moonshine.internal.PrefixedDelegateIterator;
 import net.kyori.moonshine.model.MoonshineMethod;
 import net.kyori.moonshine.placeholder.ConclusionValue;
 import net.kyori.moonshine.placeholder.ContinuanceValue;
@@ -82,7 +79,7 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
           exactParameterTypes[idx], value.getClass());
 
       final @Nullable Placeholder placeholder = parameter.getAnnotation(Placeholder.class);
-      //noinspection ConstantConditions -- Javadocs say it returns null if absent.
+      // noinspection ConstantConditions -- Javadocs say it returns null if absent.
       if (placeholder == null) {
         // Nothing to resolve.
         continue;
@@ -129,20 +126,13 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
         final Type type = continuanceEntry.getValue().type();
         final Object value = continuanceEntry.getValue().value();
 
-        final Iterator<Type> hierarchyIterator = Stream.concat(
-            Stream.of(type),
-            StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(this.supertypeStrategy.hierarchyIterator(type),
-                    Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.ORDERED),
-                false
-            )
-        ).iterator();
+        final Iterator<Type> hierarchyIterator =
+            new PrefixedDelegateIterator<>(type, this.supertypeStrategy.hierarchyIterator(type));
         while (hierarchyIterator.hasNext()) {
           final Type supertype = hierarchyIterator.next();
 
           for (final Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>> weighted :
-              weightedPlaceholderResolvers
-                  .getOrDefault(supertype, Collections.emptyNavigableSet())) {
+              weightedPlaceholderResolvers.getOrDefault(supertype, Collections.emptyNavigableSet())) {
             @SuppressWarnings("unchecked") // This should be equivalent.
             final IPlaceholderResolver<R, Object, ? extends F> placeholderResolver =
                 (IPlaceholderResolver<R, Object, ? extends F>) weighted.value();
