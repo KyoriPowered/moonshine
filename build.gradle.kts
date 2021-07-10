@@ -8,7 +8,6 @@ plugins {
     `maven-publish`
     checkstyle
     jacoco
-    idea
     id("com.github.hierynomus.license") version "0.16.1"
     id("org.checkerframework") version "0.5.22"
 }
@@ -25,7 +24,6 @@ subprojects {
         plugin<MavenPublishPlugin>()
         plugin<CheckstylePlugin>()
         plugin<JacocoPlugin>()
-        plugin<IdeaPlugin>()
         plugin<LicensePlugin>()
         plugin<CheckerFrameworkPlugin>()
     }
