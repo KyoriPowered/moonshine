@@ -18,9 +18,9 @@
 
 package net.kyori.moonshine.exception;
 
-import net.kyori.moonshine.internal.ReflectiveUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import net.kyori.moonshine.internal.ReflectiveUtils;
 
 public final class MissingMoonshineMethodMappingException extends MoonshineException {
   private final Type owner;

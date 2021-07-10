@@ -18,9 +18,9 @@
 
 package net.kyori.moonshine.receiver;
 
-import net.kyori.moonshine.exception.ReceiverMissingException;
 import java.lang.reflect.Method;
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
+import net.kyori.moonshine.exception.ReceiverMissingException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

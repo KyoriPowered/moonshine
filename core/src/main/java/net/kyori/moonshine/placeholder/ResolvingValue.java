@@ -18,7 +18,7 @@
 
 package net.kyori.moonshine.placeholder;
 
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import org.checkerframework.dataflow.qual.Pure;
 
 /**

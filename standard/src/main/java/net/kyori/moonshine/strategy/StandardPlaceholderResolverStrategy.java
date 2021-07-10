@@ -18,7 +18,6 @@
 
 package net.kyori.moonshine.strategy;
 
-import com.google.common.collect.Iterators;
 import io.leangen.geantyref.GenericTypeReflector;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -28,9 +27,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
-import javax.annotation.concurrent.ThreadSafe;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import net.kyori.moonshine.Moonshine;
 import net.kyori.moonshine.annotation.Placeholder;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.PlaceholderResolvingException;
 import net.kyori.moonshine.exception.UnfinishedPlaceholderException;
 import net.kyori.moonshine.model.MoonshineMethod;
@@ -126,8 +129,14 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
         final Type type = continuanceEntry.getValue().type();
         final Object value = continuanceEntry.getValue().value();
 
-        final Iterator<Type> hierarchyIterator = Iterators.concat(Iterators.singletonIterator(type),
-            this.supertypeStrategy.hierarchyIterator(type));
+        final Iterator<Type> hierarchyIterator = Stream.concat(
+            Stream.of(type),
+            StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(this.supertypeStrategy.hierarchyIterator(type),
+                    Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.ORDERED),
+                false
+            )
+        ).iterator();
         while (hierarchyIterator.hasNext()) {
           final Type supertype = hierarchyIterator.next();
 

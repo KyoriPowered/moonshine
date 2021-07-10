@@ -18,8 +18,8 @@
 
 package net.kyori.moonshine.message;
 
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.MissingMessageException;
-import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A source for messages.

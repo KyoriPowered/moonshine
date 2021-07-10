@@ -18,11 +18,11 @@
 
 package net.kyori.moonshine.strategy;
 
+import java.util.Map;
 import net.kyori.moonshine.Moonshine;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.PlaceholderResolvingException;
 import net.kyori.moonshine.model.MoonshineMethod;
-import java.util.Map;
-import javax.annotation.concurrent.ThreadSafe;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

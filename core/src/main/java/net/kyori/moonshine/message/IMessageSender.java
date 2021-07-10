@@ -18,7 +18,7 @@
 
 package net.kyori.moonshine.message;
 
-import javax.annotation.concurrent.ThreadSafe;
+import net.kyori.moonshine.annotation.meta.ThreadSafe;
 
 /**
  * A trait that defines how to send finalised messages to the given receiver.
