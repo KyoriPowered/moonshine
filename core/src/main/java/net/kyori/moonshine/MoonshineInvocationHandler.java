@@ -55,9 +55,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     // First we need to ensure this is not one of the _required_ implemented methods, as that would
     //   cause other exceptions later down the line and break expected behaviour of Java objects.
     if (isEqualsMethod(method)) {
-      return args != null
-          && args.length > 0
-          && this.moonshine.equals(args[0]);
+      if (args == null || args.length != 1) {
+        return Boolean.FALSE;
+      }
+
+      return this == args[0] || this.moonshine == args[0];
     } else if (isHashCodeMethod(method)) {
       return this.moonshine.hashCode();
     } else if (isToStringMethod(method)) {
