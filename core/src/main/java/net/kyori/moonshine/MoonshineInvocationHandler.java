@@ -22,11 +22,9 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Map;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.MissingMoonshineMethodMappingException;
 import net.kyori.moonshine.internal.ReflectiveUtils;
-import net.kyori.moonshine.model.MoonshineMethod;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -55,15 +53,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     // First we need to ensure this is not one of the _required_ implemented methods, as that would
     //   cause other exceptions later down the line and break expected behaviour of Java objects.
     if (isEqualsMethod(method)) {
-      if (args == null || args.length != 1) {
-        return Boolean.FALSE;
-      }
-
-      return this == args[0] || this.moonshine == args[0];
+      return this.proxiedEquals(args);
     } else if (isHashCodeMethod(method)) {
       return this.moonshine.hashCode();
     } else if (isToStringMethod(method)) {
-      return GenericTypeReflector.getTypeName(this.moonshine.proxiedType().getType()) + '@' + this.moonshine.hashCode();
+      return this.proxiedToString();
     }
 
     // With that out of the way, get rid of nulls in our parameters.
@@ -90,8 +84,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
       return this.moonshine;
     }
 
-    final @Nullable MoonshineMethod<? extends R> moonshineMethod =
-        this.moonshine.scannedMethods().get(method);
+    final var moonshineMethod = this.moonshine.scannedMethods().get(method);
     if (moonshineMethod == null) {
       // This is illegal state, and should be reported if encountered.
       throw new MissingMoonshineMethodMappingException(this.moonshine.proxiedType().getType(), method);
@@ -99,11 +92,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
     final R receiver = moonshineMethod.receiverLocator().locate(method, proxy, args);
     final I intermediateMessage = this.moonshine.messageSource().messageOf(receiver, moonshineMethod.messageKey());
-    final Map<String, ? extends F> resolvedPlaceholders = this.moonshine.placeholderResolverStrategy()
-        .resolvePlaceholders(
-            this.moonshine, receiver, intermediateMessage, moonshineMethod, args);
-    final O renderedMessage = this.moonshine.messageRenderer().render(receiver, intermediateMessage,
-        resolvedPlaceholders, method, this.moonshine.proxiedType().getType());
+    final var resolvedPlaceholders =
+        this.moonshine.placeholderResolverStrategy()
+            .resolvePlaceholders(
+                this.moonshine,
+                receiver,
+                intermediateMessage,
+                moonshineMethod,
+                args
+            );
+    final O renderedMessage = this.moonshine.messageRenderer().render(
+        receiver,
+        intermediateMessage,
+        resolvedPlaceholders,
+        method,
+        this.moonshine.proxiedType().getType()
+    );
 
     if (method.getReturnType() == void.class) {
       this.moonshine.messageSender().send(receiver, renderedMessage);
@@ -111,6 +115,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     } else {
       return renderedMessage;
     }
+  }
+
+  private boolean proxiedEquals(final @Nullable Object @Nullable [] args) {
+    if (args == null || args.length != 1) {
+      return false;
+    }
+
+    return args[0] == this || args[0] == this.moonshine;
+  }
+
+  private String proxiedToString() {
+    return GenericTypeReflector.getTypeName(this.moonshine.proxiedType().getType())
+        + '@' + this.moonshine.hashCode();
   }
 
   private static boolean isEqualsMethod(final Method method) {
