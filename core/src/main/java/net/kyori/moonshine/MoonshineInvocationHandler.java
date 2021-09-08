@@ -100,7 +100,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
         intermediateMessage,
         resolvedPlaceholders,
         method,
-        this.moonshine.proxiedType().getType()
+        this.moonshine.proxiedType()
     );
 
     if (method.getReturnType() == void.class) {
@@ -120,7 +120,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
   }
 
   private String proxiedToString() {
-    return GenericTypeReflector.getTypeName(this.moonshine.proxiedType().getType())
+    return GenericTypeReflector.getTypeName(this.moonshine.proxiedType())
         + '@' + this.moonshine.hashCode();
   }
 

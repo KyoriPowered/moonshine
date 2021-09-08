@@ -137,8 +137,8 @@ public final class Moonshine<R, I, O, F> {
    * @return the type which is being proxied with this instance
    */
   @Pure
-  public TypeToken<?> proxiedType() {
-    return this.proxiedType;
+  public Type proxiedType() {
+    return this.proxiedType.getType();
   }
 
   /**
@@ -186,7 +186,7 @@ public final class Moonshine<R, I, O, F> {
   public MoonshineMethod<? extends R> scannedMethod(final Method method) throws MissingMoonshineMethodMappingException {
     final var scanned = this.scannedMethods.get(method);
     if (scanned == null) {
-      throw new MissingMoonshineMethodMappingException(this.proxiedType().getType(), method);
+      throw new MissingMoonshineMethodMappingException(this.proxiedType(), method);
     }
 
     return scanned;
