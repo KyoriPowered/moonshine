@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
+import net.kyori.moonshine.exception.MissingMoonshineMethodMappingException;
 import net.kyori.moonshine.exception.scan.UnscannableMethodException;
 import net.kyori.moonshine.message.IMessageRenderer;
 import net.kyori.moonshine.message.IMessageSender;
@@ -175,10 +176,20 @@ public final class Moonshine<R, I, O, F> {
   }
 
   /**
-   * @return an unmodifiable view of all available scanned methods
+   * Find a scanned method by the given method mapping.
+   *
+   * @param method the method to find a scanned method for
+   * @return the scanned method
+   * @throws MissingMoonshineMethodMappingException if a method mapping is missing somehow; this shouldn't happen, but
+   * is here just in case
    */
-  public Map<Method, MoonshineMethod<? extends R>> scannedMethods() {
-    return this.scannedMethods;
+  public MoonshineMethod<? extends R> scannedMethod(final Method method) throws MissingMoonshineMethodMappingException {
+    final var scanned = this.scannedMethods.get(method);
+    if (scanned == null) {
+      throw new MissingMoonshineMethodMappingException(this.proxiedType().getType(), method);
+    }
+
+    return scanned;
   }
 
   /**
