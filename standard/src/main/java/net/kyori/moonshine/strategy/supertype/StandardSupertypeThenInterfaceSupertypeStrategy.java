@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -118,11 +119,7 @@ public final class StandardSupertypeThenInterfaceSupertypeStrategy implements IS
       final Class<?>[] interfaces = GenericTypeReflector.erase(superType).getInterfaces();
       for (final Class<?> iface : interfaces) {
         final @Nullable Type exact = GenericTypeReflector.getExactSuperType(baseType, iface);
-        if (exact == null) {
-          types.add(iface);
-        } else {
-          types.add(exact);
-        }
+        types.add(Objects.requireNonNullElse(exact, iface));
       }
       for (final Class<?> iface : interfaces) {
         types.addAll(this.aggregateSuperInterfaces(Stream.of(iface), baseType));
