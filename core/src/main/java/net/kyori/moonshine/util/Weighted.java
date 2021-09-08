@@ -17,10 +17,7 @@
  */
 package net.kyori.moonshine.util;
 
-import java.util.Objects;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * A weighted value.
@@ -28,49 +25,9 @@ import org.checkerframework.dataflow.qual.Pure;
  * @param <V> the value contained
  */
 @ThreadSafe
-public final class Weighted<V> implements Comparable<Weighted<V>> {
-  private final V value;
-  private final int weight;
-
-  public Weighted(final V value, final int weight) {
-    this.value = value;
-    this.weight = weight;
-  }
-
-  @Pure
-  public V value() {
-    return this.value;
-  }
-
-  @Pure
-  public int weight() {
-    return this.weight;
-  }
-
+public final record Weighted<V>(V value, int weight) implements Comparable<Weighted<V>> {
   @Override
   public int compareTo(final Weighted<V> o) {
     return Integer.compare(this.weight(), o.weight());
-  }
-
-  @Override
-  public boolean equals(final @Nullable Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || this.getClass() != o.getClass()) {
-      return false;
-    }
-    final Weighted<?> weighted = (Weighted<?>) o;
-    return this.weight() == weighted.weight() && this.value().equals(weighted.value());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(this.value(), this.weight());
-  }
-
-  @Override
-  public String toString() {
-    return "Weighted{value=" + this.value() + ", weight=" + this.weight() + '}';
   }
 }
