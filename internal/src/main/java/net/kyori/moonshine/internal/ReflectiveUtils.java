@@ -46,7 +46,7 @@ public final class ReflectiveUtils {
    * @return the found method
    * @throws IllegalAccessException if the method is inaccessible
    */
-  @SuppressWarnings("RedundantThrows") // This is sneakily thrown.
+  @SuppressWarnings({"RedundantThrows", "java:S1130"}) // This is sneakily thrown.
   public static MethodHandle findMethod(final Method method, final Object proxy)
       throws IllegalAccessException {
     final Class<?> type = method.getDeclaringClass();
