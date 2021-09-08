@@ -117,11 +117,10 @@ public final class Either<L, R> {
   @Pure
   @Override
   public boolean equals(final @Nullable Object other) {
-    if (!(other instanceof Either)) {
+    if (!(other instanceof final Either<?, ?> otherEither)) {
       return false;
     }
 
-    final Either<?, ?> otherEither = (Either<?, ?>) other;
     return Objects.equals(otherEither.leftRaw(), this.leftRaw())
         && Objects.equals(otherEither.rightRaw(), this.rightRaw());
   }
