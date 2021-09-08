@@ -12,6 +12,12 @@ plugins {
     jacoco
 }
 
+indra {
+    checkstyle {
+        toolVersion = "9.0"
+    }
+}
+
 testlogger {
     theme = ThemeType.MOCHA_PARALLEL
     showPassed = true

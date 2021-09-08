@@ -37,6 +37,7 @@ public final class Either<L, R> {
   private final @Nullable L left;
   private final @Nullable R right;
 
+  @SuppressWarnings("UnnecessaryParentheses") // Checkstyle wants me to use invalid syntax :D
   private Either(final @Nullable L left, final @Nullable R right) {
     if ((left == null) == (right == null)) {
       throw new IllegalArgumentException("must be either left or right");
