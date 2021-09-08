@@ -35,19 +35,9 @@ dependencies {
     testRuntimeOnly(libs.bundles.testing.runtime)
 }
 
-java {
-    disableAutoTargetJvm()
-}
-
 tasks {
     withType<JavaCompile> {
         options.compilerArgs.add("-parameters")
-    }
-
-    compileTestJava {
-        options.release.set(11)
-        sourceCompatibility = "11"
-        targetCompatibility = sourceCompatibility
     }
 
     javadoc {
@@ -56,10 +46,10 @@ tasks {
 
         opt.encoding("UTF-8")
         opt.charSet("UTF-8")
-        opt.source("8")
+        opt.source("16")
         doFirst {
             opt.links(
-                "https://docs.oracle.com/javase/8/docs/api/"
+                "https://docs.oracle.com/en/java/javase/16/docs/api/",
             )
         }
     }

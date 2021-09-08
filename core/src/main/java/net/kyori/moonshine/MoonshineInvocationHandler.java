@@ -24,13 +24,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.MissingMoonshineMethodMappingException;
-import net.kyori.moonshine.internal.IFindMethod;
-import net.kyori.moonshine.internal.jre8.Java8FindMethod;
-import net.kyori.moonshine.internal.jre9.Java9FindMethod;
+import net.kyori.moonshine.internal.ReflectiveUtils;
 import net.kyori.moonshine.model.MoonshineMethod;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -47,11 +43,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
    * An empty array to substitute a state of missing method arguments.
    */
   private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-
-  /**
-   * Utility to find {@link MethodHandle}s in
-   */
-  private static final IFindMethod FIND_METHOD_UTIL;
 
   private final Moonshine<R, I, O, F> moonshine;
 
@@ -90,7 +81,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     // We have nothing to do if the user has specified a default implementation...
     if (method.isDefault()) {
       // ... in which case, find it and invoke it appropriately.
-      final MethodHandle handle = FIND_METHOD_UTIL.findMethod(method, proxy);
+      final MethodHandle handle = ReflectiveUtils.findMethod(method, proxy);
       if (args.length == 0) {
         return handle.invokeExact(proxy);
       } else {
@@ -124,21 +115,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
       return null;
     } else {
       return renderedMessage;
-    }
-  }
-
-  static {
-    boolean isJava9 = false;
-    try {
-      Optional.class.getDeclaredMethod("ifPresentOrElse", Consumer.class, Runnable.class);
-      isJava9 = true;
-    } catch (final NoSuchMethodException ignored) {
-      // This is not Java 9; nothing to do.
-    }
-    if (isJava9) {
-      FIND_METHOD_UTIL = new Java9FindMethod();
-    } else {
-      FIND_METHOD_UTIL = new Java8FindMethod();
     }
   }
 }
