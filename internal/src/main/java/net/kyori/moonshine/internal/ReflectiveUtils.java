@@ -19,17 +19,53 @@
 package net.kyori.moonshine.internal;
 
 import io.leangen.geantyref.GenericTypeReflector;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
  * Utilities for handling reflective operations.
  */
 public final class ReflectiveUtils {
+  private static final ConcurrentMap<Method, MethodHandle> METHOD_CACHE = new ConcurrentHashMap<>();
+
   private ReflectiveUtils() {
+  }
+
+  /**
+   * Find a single {@code default} method for the given interfaces of a {@link java.lang.reflect.Proxy proxy}.
+   *
+   * @param method the method to find
+   * @param proxy  the proxy to find the method within
+   * @return the found method
+   * @throws IllegalAccessException if the method is inaccessible
+   */
+  @SuppressWarnings("RedundantThrows") // This is sneakily thrown.
+  public static MethodHandle findMethod(final Method method, final Object proxy)
+      throws IllegalAccessException {
+    final Class<?> type = method.getDeclaringClass();
+
+    return METHOD_CACHE.computeIfAbsent(method,
+        methodParam -> {
+          try {
+            return MethodHandles.privateLookupIn(proxy.getClass(), MethodHandles.lookup())
+                .findSpecial(type,
+                    method.getName(),
+                    MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                    type)
+                .bindTo(proxy);
+          } catch (final NoSuchMethodException | IllegalAccessException ex) {
+            ThrowableUtils.sneakyThrow(ex);
+            throw new RuntimeException(ex);
+          }
+        });
   }
 
   /**

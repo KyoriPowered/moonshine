@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     api(project(":moonshine-core"))
-    implementation(project(":moonshine-internal-common"))
+    implementation(project(":moonshine-internal"))
 }
