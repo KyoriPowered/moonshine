@@ -46,7 +46,6 @@ tasks {
 
         opt.encoding("UTF-8")
         opt.charSet("UTF-8")
-        opt.source("16")
         doFirst {
             opt.links(
                 "https://docs.oracle.com/en/java/javase/16/docs/api/",
