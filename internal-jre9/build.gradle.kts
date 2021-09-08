@@ -1,6 +1,13 @@
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_9
-    targetCompatibility = sourceCompatibility
+plugins {
+    id("moonshine.api")
+}
+
+tasks {
+    compileJava {
+        options.release.set(9)
+        sourceCompatibility = "9"
+        targetCompatibility = sourceCompatibility
+    }
 }
 
 dependencies {

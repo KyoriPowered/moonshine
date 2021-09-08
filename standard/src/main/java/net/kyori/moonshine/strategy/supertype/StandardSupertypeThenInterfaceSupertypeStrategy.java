@@ -59,7 +59,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *   <li>{@code SuperB3}</li>
  *   <li>No {@code SuperB2}, because {@code A} implements this</li>
  * </ol>
- * </p>
  */
 @ThreadSafe
 public final class StandardSupertypeThenInterfaceSupertypeStrategy implements ISupertypeStrategy {

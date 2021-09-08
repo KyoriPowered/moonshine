@@ -1,0 +1,31 @@
+[versions]
+gradle-plugin-indra = "2.0.6"
+gradle-plugin-testlog = "3.0.0"
+
+checkerframework = "3.18.0"
+junit-jupiter = "5.7.2"
+assertj = "3.20.2"
+mockito = "3.12.4"
+
+[libraries]
+gradle-plugin-indra = { module = "net.kyori:indra-common", version.ref = "gradle-plugin-indra" }
+gradle-plugin-indra-publishing = { module = "net.kyori:indra-publishing-sonatype", version.ref = "gradle-plugin-indra" }
+gradle-plugin-testlog = { module = "com.adarshr:gradle-test-logger-plugin", version.ref = "gradle-plugin-testlog" }
+
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+mockito = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+checkerframework = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
+
+[bundles]
+testing-api = [
+  "junit-jupiter-api",
+  "junit-jupiter-params",
+  "assertj-core",
+  "mockito",
+]
+testing-runtime = [
+  "junit-jupiter-engine",
+]
