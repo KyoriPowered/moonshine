@@ -54,19 +54,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
       throws Throwable {
     // First we need to ensure this is not one of the _required_ implemented methods, as that would
     //   cause other exceptions later down the line and break expected behaviour of Java objects.
-    if (method.getName().equals("equals")
-        && method.getParameterCount() == 1
-        && method.getReturnType() == boolean.class) {
+    if (isEqualsMethod(method)) {
       return args != null
           && args.length > 0
           && this.moonshine.equals(args[0]);
-    } else if (method.getName().equals("hashCode")
-        && method.getParameterCount() == 0
-        && method.getReturnType() == int.class) {
+    } else if (isHashCodeMethod(method)) {
       return this.moonshine.hashCode();
-    } else if (method.getName().equals("toString")
-        && method.getParameterCount() == 0
-        && method.getReturnType() == String.class) {
+    } else if (isToStringMethod(method)) {
       return GenericTypeReflector.getTypeName(this.moonshine.proxiedType().getType()) + '@' + this.moonshine.hashCode();
     }
 
@@ -115,5 +109,23 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     } else {
       return renderedMessage;
     }
+  }
+
+  private static boolean isEqualsMethod(final Method method) {
+    return "equals".equals(method.getName())
+        && method.getParameterCount() == 1
+        && method.getReturnType() == boolean.class;
+  }
+
+  private static boolean isHashCodeMethod(final Method method) {
+    return "hashCode".equals(method.getName())
+        && method.getParameterCount() == 0
+        && method.getReturnType() == int.class;
+  }
+
+  private static boolean isToStringMethod(final Method method) {
+    return "toString".equals(method.getName())
+        && method.getParameterCount() == 0
+        && method.getReturnType() == String.class;
   }
 }
