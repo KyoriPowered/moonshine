@@ -17,6 +17,8 @@
  */
 package net.kyori.moonshine.strategy;
 
+import static java.util.Collections.emptyNavigableSet;
+
 import io.leangen.geantyref.GenericTypeReflector;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -24,8 +26,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.NavigableSet;
 import net.kyori.moonshine.Moonshine;
 import net.kyori.moonshine.annotation.Placeholder;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
@@ -33,12 +33,9 @@ import net.kyori.moonshine.exception.PlaceholderResolvingException;
 import net.kyori.moonshine.exception.UnfinishedPlaceholderException;
 import net.kyori.moonshine.internal.PrefixedDelegateIterator;
 import net.kyori.moonshine.model.MoonshineMethod;
-import net.kyori.moonshine.placeholder.ConclusionValue;
 import net.kyori.moonshine.placeholder.ContinuanceValue;
 import net.kyori.moonshine.placeholder.IPlaceholderResolver;
 import net.kyori.moonshine.strategy.supertype.ISupertypeStrategy;
-import net.kyori.moonshine.util.Either;
-import net.kyori.moonshine.util.Weighted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ThreadSafe
@@ -78,7 +75,6 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
           exactParameterTypes[idx], value.getClass());
 
       final @Nullable Placeholder placeholder = parameter.getAnnotation(Placeholder.class);
-      // noinspection ConstantConditions -- Javadocs say it returns null if absent.
       if (placeholder == null) {
         // Nothing to resolve.
         continue;
@@ -110,17 +106,14 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
       final Map<String, ContinuanceValue<?>> resolvingPlaceholders,
       final MoonshineMethod<? extends R> moonshineMethod, final @Nullable Object[] parameters)
       throws UnfinishedPlaceholderException {
-    final Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers =
-        moonshine.weightedPlaceholderResolvers();
+    final var weightedPlaceholderResolvers = moonshine.weightedPlaceholderResolvers();
 
     // Shamelessly stealing kashike's joke
     dancing:
     while (!resolvingPlaceholders.isEmpty()) {
-      final Iterator<Entry<String, ContinuanceValue<?>>> resolvingPlaceholderIterator = resolvingPlaceholders
-          .entrySet().iterator();
+      final var resolvingPlaceholderIterator = resolvingPlaceholders.entrySet().iterator();
       while (resolvingPlaceholderIterator.hasNext()) {
-        final Entry<String, ContinuanceValue<?>> continuanceEntry = resolvingPlaceholderIterator
-            .next();
+        final var continuanceEntry = resolvingPlaceholderIterator.next();
         final String continuancePlaceholderName = continuanceEntry.getKey();
         final Type type = continuanceEntry.getValue().type();
         final Object value = continuanceEntry.getValue().value();
@@ -130,18 +123,15 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
         while (hierarchyIterator.hasNext()) {
           final Type supertype = hierarchyIterator.next();
 
-          for (final Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>> weighted :
-              weightedPlaceholderResolvers.getOrDefault(supertype, Collections.emptyNavigableSet())) {
+          for (final var weighted : weightedPlaceholderResolvers.getOrDefault(supertype, emptyNavigableSet())) {
             @SuppressWarnings("unchecked") // This should be equivalent.
-            final IPlaceholderResolver<R, Object, ? extends F> placeholderResolver =
+            final var placeholderResolver =
                 (IPlaceholderResolver<R, Object, ? extends F>) weighted.value();
 
-            @SuppressWarnings({"unchecked", "RedundantCast"}) // This should be equivalent.
-            @Nullable final Map<String, Either<ConclusionValue<? extends F>, ContinuanceValue<?>>> resolverResult =
-                (Map<String, Either<ConclusionValue<? extends F>, ContinuanceValue<?>>>) (Map<String, ?>) placeholderResolver
-                    .resolve(continuancePlaceholderName, value, receiver,
-                        moonshineMethod.owner().getType(),
-                        moonshineMethod.reflectMethod(), parameters);
+            final var resolverResult =
+                placeholderResolver.resolve(continuancePlaceholderName, value, receiver,
+                    moonshineMethod.owner().getType(),
+                    moonshineMethod.reflectMethod(), parameters);
             if (resolverResult == null) {
               // The resolver did not want to resolve this; pass it on.
               continue;
@@ -158,8 +148,7 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
           }
         }
 
-        throw new UnfinishedPlaceholderException(moonshineMethod, continuancePlaceholderName,
-            value);
+        throw new UnfinishedPlaceholderException(moonshineMethod, continuancePlaceholderName, value);
       }
     }
   }
