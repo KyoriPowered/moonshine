@@ -61,7 +61,7 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
     final Map<String, ContinuanceValue<?>> resolvingPlaceholders = new LinkedHashMap<>(16);
     final Parameter[] methodParameters = moonshineMethod.reflectMethod().getParameters();
     final Type[] exactParameterTypes = GenericTypeReflector.getParameterTypes(
-        moonshineMethod.reflectMethod(), moonshine.proxiedType().getType());
+        moonshineMethod.reflectMethod(), moonshine.proxiedType());
 
     for (int idx = 0; idx < parameters.length; ++idx) {
       final Parameter parameter = methodParameters[idx];
