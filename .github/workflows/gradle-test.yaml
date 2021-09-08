@@ -1,15 +1,12 @@
-name: Code Coverage
-on: [ push, pull_request ]
-
-env:
-  CI: true
+name: Compile and test with Gradle
+on: [push, pull_request]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [11, 16]
+        java: [16]
     steps:
       - uses: actions/checkout@v2
       - name: JDK ${{ matrix.java }}
@@ -21,10 +18,7 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-${{ matrix.java }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-${{ matrix.java }}-gradle
       - name: Build
-        run: ./gradlew test
-      - name: CodeCov
-        uses: codecov/codecov-action@v1
-        with:
-          directory: build/reports/jacoco/
+        run: ./gradlew build --no-daemon
+      - name: Test
+        run: ./gradlew test --no-daemon
