@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
-import net.kyori.moonshine.exception.MissingMoonshineMethodMappingException;
 import net.kyori.moonshine.internal.ReflectiveUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -84,12 +83,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
       return this.moonshine;
     }
 
-    final var moonshineMethod = this.moonshine.scannedMethods().get(method);
-    if (moonshineMethod == null) {
-      // This is illegal state, and should be reported if encountered.
-      throw new MissingMoonshineMethodMappingException(this.moonshine.proxiedType().getType(), method);
-    }
-
+    final var moonshineMethod = this.moonshine.scannedMethod(method);
     final R receiver = moonshineMethod.receiverLocator().locate(method, proxy, args);
     final I intermediateMessage = this.moonshine.messageSource().messageOf(receiver, moonshineMethod.messageKey());
     final var resolvedPlaceholders =
