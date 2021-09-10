@@ -4,7 +4,7 @@ import org.gradle.accessors.dm.LibrariesForLibs
 plugins {
     id("moonshine.publishing")
     id("net.kyori.indra")
-    id("net.kyori.indra.checkstyle")
+//    id("net.kyori.indra.checkstyle")
     id("net.kyori.indra.license-header")
     id("com.adarshr.test-logger")
     java
@@ -12,11 +12,11 @@ plugins {
     jacoco
 }
 
-indra {
-    checkstyle {
-        toolVersion = "9.0"
-    }
-}
+//indra {
+//    checkstyle {
+//        toolVersion = "9.0"
+//    }
+//}
 
 testlogger {
     theme = ThemeType.MOCHA_PARALLEL
