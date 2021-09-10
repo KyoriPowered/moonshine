@@ -71,7 +71,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
       // ... in which case, find it and invoke it appropriately.
       final MethodHandle handle = ReflectiveUtils.findMethod(method, proxy);
       if (args.length == 0) {
-        return handle.invokeExact(proxy);
+        return handle.invoke();
       } else {
         return handle.invokeWithArguments(args);
       }
