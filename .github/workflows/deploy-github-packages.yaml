@@ -11,7 +11,8 @@ jobs:
           java-version: '16'
           distribution: temurin
       - name: Deploy
-        run: ./gradlew deployToGithubPackages
+        run: ./gradlew publishAllPublicationsToGithubPackagesRepository
         env:
+          GITHUB_PACKAGES: true
           GITHUB_PACKAGES_USERNAME: ${{ github.actor }}
           GITHUB_PACKAGES_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
