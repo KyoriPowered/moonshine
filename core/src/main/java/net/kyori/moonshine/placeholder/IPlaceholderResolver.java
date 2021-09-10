@@ -34,6 +34,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @FunctionalInterface
 @ThreadSafe
 public interface IPlaceholderResolver<R, P, F> {
+  static <R, P> IPlaceholderResolver<R, P, P> identityPlaceholderResolver() {
+    return (placeholderName, value, receiver, owner, method, parameters) ->
+        Map.of(placeholderName, Either.left(ConclusionValue.conclusionValue(value)));
+  }
+
   /**
    * Resolves a given value into a result. In most cases, you want to return {@link
    * ContinuanceValue#continuanceValue(Object, Type) ContinuanceValue}s.
