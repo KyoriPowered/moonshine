@@ -52,7 +52,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
-/* package-private */ class FullMoonshineTest {
+class FullMoonshineTest {
   @Test
   void fullyFledgedMoonshineInstance() throws Exception {
     final MockedReceiver receiver = mock(MockedReceiver.class);

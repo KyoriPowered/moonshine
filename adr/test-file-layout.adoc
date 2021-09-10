@@ -1,0 +1,30 @@
+= Testing file layout
+
+== Summary
+
+=== Issue
+
+Our project requires a standardised file layout for tests. This is necessary because there
+are several tests, and they will become rather large due to the nature of the library.
+
+The library prefers using proper classes in actual implementations and usages of it, however
+this is not necessarily the case for testing, as they should be as self-contained as possible.
+
+=== Decision
+
+Use a single test per test class with the following structure:
+
+.Structure
+[source]
+--
+src/main/test/<package>
++ <test files>
++ placeholder/
+  \ <placeholder resolvers and whatnot>
++ util/
+  \ <util method classes and whatnot>
+--
+
+=== Status
+
+Decided. We are open to new alternatives if necessary.
