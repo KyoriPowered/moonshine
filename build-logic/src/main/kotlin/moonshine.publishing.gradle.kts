@@ -29,3 +29,18 @@ indra {
         }
     }
 }
+
+publishing {
+    repositories {
+        if (java.lang.Boolean.getBoolean("GITHUB_PACKAGES")) {
+            maven {
+                name = "GithubPackages"
+                url = uri("https://maven.pkg.github.com/KyoriPowered/moonshine")
+                credentials {
+                    username = System.getenv("GITHUB_PACKAGES_USERNAME")
+                    password = System.getenv("GITHUB_PACKAGES_PASSWORD")
+                }
+            }
+        }
+    }
+}
