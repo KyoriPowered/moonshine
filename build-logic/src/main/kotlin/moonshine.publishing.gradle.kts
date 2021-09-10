@@ -32,7 +32,7 @@ indra {
 
 publishing {
     repositories {
-        if (java.lang.Boolean.getBoolean("GITHUB_PACKAGES")) {
+        if (System.getenv("GITHUB_PACKAGES") != null) {
             maven {
                 name = "GithubPackages"
                 url = uri("https://maven.pkg.github.com/KyoriPowered/moonshine")
