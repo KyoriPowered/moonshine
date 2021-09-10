@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.kyori.moonshine;
+package net.kyori.moonshine.util;
 
 public enum Unit {
   UNIT
