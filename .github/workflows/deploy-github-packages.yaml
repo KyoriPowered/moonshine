@@ -13,5 +13,5 @@ jobs:
       - name: Deploy
         run: ./gradlew deployToGithubPackages
         env:
-          GITHUB_PACKAGES_USERNAME: {{ github.actor }}
-          GITHUB_PACKAGES_PASSWORD: {{ secrets.GITHUB_TOKEN }}
+          GITHUB_PACKAGES_USERNAME: ${{ github.actor }}
+          GITHUB_PACKAGES_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
