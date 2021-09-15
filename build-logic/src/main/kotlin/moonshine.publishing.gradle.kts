@@ -30,9 +30,17 @@ indra {
     }
 }
 
-publishing {
-    repositories {
-        if (System.getenv("GITHUB_PACKAGES") != null) {
+if (System.getenv("GITHUB_PACKAGES") != null) {
+    afterEvaluate {
+        if (version.toString().endsWith("-SNAPSHOT")) {
+            val ref = System.getenv("GITHUB_REF")?.split('/', limit = 3)?.last()
+                ?: System.getenv("GITHUB_SHA")!!.take(6)
+            version = "$version+git.$ref"
+        }
+    }
+
+    publishing {
+        repositories {
             maven {
                 name = "GithubPackages"
                 url = uri("https://maven.pkg.github.com/KyoriPowered/moonshine")
