@@ -114,7 +114,7 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
     final Map<Type, NavigableSet<Weighted<? extends IPlaceholderResolver<? extends R, ?, ? extends F>>>> weightedPlaceholderResolvers =
         moonshine.weightedPlaceholderResolvers();
 
-    // Shamelessly stealing kashike's joke
+    // Shamelessly stealing ~~kashike's~~ mbaxter's joke
     dancing:
     while (!resolvingPlaceholders.isEmpty()) {
       final Iterator<Entry<String, ContinuanceValue<?>>> resolvingPlaceholderIterator = resolvingPlaceholders
