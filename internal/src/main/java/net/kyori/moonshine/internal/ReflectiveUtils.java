@@ -54,7 +54,7 @@ public final class ReflectiveUtils {
     return METHOD_CACHE.computeIfAbsent(method,
         methodParam -> {
           try {
-            return MethodHandles.privateLookupIn(proxy.getClass(), MethodHandles.lookup())
+            return MethodHandles.privateLookupIn(method.getDeclaringClass(), MethodHandles.lookup())
                 .findSpecial(type,
                     method.getName(),
                     MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
