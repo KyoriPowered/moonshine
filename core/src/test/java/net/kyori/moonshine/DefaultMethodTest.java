@@ -26,8 +26,6 @@ import static org.mockito.Mockito.when;
 
 import io.leangen.geantyref.TypeToken;
 import java.util.Map;
-import net.kyori.moonshine.annotation.Message;
-import net.kyori.moonshine.annotation.Placeholder;
 import net.kyori.moonshine.message.IMessageRenderer;
 import net.kyori.moonshine.message.IMessageSender;
 import net.kyori.moonshine.message.IMessageSource;
@@ -38,8 +36,6 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
 class DefaultMethodTest {
-  private static final String MESSAGE_KEY = "test";
-  private static final String DEFAULT_VALUE = "default placeholder value";
 
   @Test
   void emptyDefaultMethodTest() throws Exception {
@@ -50,7 +46,7 @@ class DefaultMethodTest {
     when(renderer.render(any(), any(), any(), any(), any())).thenReturn(UNIT);
 
     assertThatCode(() ->
-        Moonshine.<TestType, Unit>builder(TypeToken.get(TestType.class))
+        Moonshine.<DefaultMethodTestType, Unit>builder(TypeToken.get(DefaultMethodTestType.class))
             .receiverLocatorResolver((method, proxy) -> (method1, proxy1, parameters) -> UNIT, 1)
             .sourced(source)
             .rendered(renderer)
@@ -64,7 +60,7 @@ class DefaultMethodTest {
             .empty()
     ).doesNotThrowAnyException();
 
-    verify(source).messageOf(UNIT, MESSAGE_KEY);
+    verify(source).messageOf(UNIT, DefaultMethodTestType.MESSAGE_KEY);
     verify(sender).send(UNIT, UNIT);
   }
 
@@ -77,7 +73,7 @@ class DefaultMethodTest {
     when(renderer.render(any(), any(), any(), any(), any())).thenReturn(UNIT);
 
     assertThatCode(() ->
-        Moonshine.<TestType, Unit>builder(TypeToken.get(TestType.class))
+        Moonshine.<DefaultMethodTestType, Unit>builder(TypeToken.get(DefaultMethodTestType.class))
             .receiverLocatorResolver((method, proxy) -> (method1, proxy1, parameters) -> UNIT, 1)
             .sourced(source)
             .rendered(renderer)
@@ -88,23 +84,11 @@ class DefaultMethodTest {
             .weightedPlaceholderResolver(String.class,
                 (placeholderName, value, receiver, owner, method, parameters) -> Map.of(), 1)
             .create()
-            .withParameter(DEFAULT_VALUE)
+            .withParameter(DefaultMethodTestType.DEFAULT_VALUE)
     ).doesNotThrowAnyException();
 
-    verify(source).messageOf(UNIT, MESSAGE_KEY);
+    verify(source).messageOf(UNIT, DefaultMethodTestType.MESSAGE_KEY);
     verify(sender).send(UNIT, UNIT);
   }
 
-  interface TestType {
-    @Message(MESSAGE_KEY)
-    void method(@Placeholder final String placeholder);
-
-    default void empty() {
-      this.method(DEFAULT_VALUE);
-    }
-
-    default void withParameter(final String placeholder) {
-      this.method(placeholder);
-    }
-  }
 }
