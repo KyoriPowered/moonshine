@@ -3,6 +3,8 @@ plugins {
     `java-platform`
 }
 
+description = "Bill of materials for moonshine"
+
 indra {
     configurePublications {
         from(components["javaPlatform"])
