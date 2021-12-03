@@ -2,6 +2,12 @@ plugins {
     id("net.kyori.indra.publishing")
 }
 
+if (System.getenv("CI").toBoolean()) {
+    val signingKey = System.getenv("SIGNING_KEY")
+    val signingPassword = System.getenv("SIGNING_PASSWORD")
+    signing.useInMemoryPgpKeys(signingKey, signingPassword)
+}
+
 indra {
     javaVersions {
         target(17)
@@ -18,6 +24,10 @@ indra {
     }
 
     configurePublications {
+        if (System.getenv("CI").toBoolean()) {
+            signing.sign(this)
+        }
+
         pom {
             developers {
                 developer {
