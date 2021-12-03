@@ -29,6 +29,15 @@ jobs:
         with:
           java-version: '17'
           distribution: temurin
+      - name: Determine whether to deploy to Central
+        id: snapshot-check
+        shell: bash
+        run: |
+          if ! cat ./build.gradle.kts | grep --regexp 'version\s*=\s*.*".*-SNAPSHOT"' 2>&1 >/dev/null ; then
+            echo "::set-output name=snapshot::false"
+          else
+            echo "::set-output name=snapshot::true"
+          fi
       - name: Deploy to OSSRH
         run: ./gradlew -PforceSign=true publish --no-daemon
         env:
@@ -37,7 +46,7 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
       - name: Deploy to Central
-        if: ${{ github.ref_type == 'tag' }}
+        if: ${{ github.ref_type == 'tag' && steps.snapshot-check.outputs.snapshot == 'false' }}
         run: ./gradlew -PforceSign=true closeAndReleaseSonatypeStagingRepository --no-daemon
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
