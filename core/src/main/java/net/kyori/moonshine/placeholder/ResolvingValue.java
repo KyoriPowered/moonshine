@@ -26,7 +26,7 @@ import org.checkerframework.dataflow.qual.Pure;
  * @param <F> the value to store
  */
 @ThreadSafe
-public abstract class ResolvingValue<F> {
+public abstract sealed class ResolvingValue<F> permits ConclusionValue, ContinuanceValue {
   private final F value;
 
   /* package-private */ ResolvingValue(final F value) {
