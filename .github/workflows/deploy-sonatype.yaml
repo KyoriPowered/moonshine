@@ -39,7 +39,7 @@ jobs:
             echo "::set-output name=snapshot::true"
           fi
       - name: Deploy to OSSRH
-        if: ${{ github.ref_type != 'tag' || steps.snapshot-check.outputs.snapshot == 'true' }}
+        if: ${{ github.ref_type != 'tag' && steps.snapshot-check.outputs.snapshot == 'true' }}
         run: ./gradlew -PforceSign=true publish --no-daemon
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
