@@ -5,7 +5,9 @@ plugins {
 if (System.getenv("CI").toBoolean()) {
     val signingKey = System.getenv("SIGNING_KEY")
     val signingPassword = System.getenv("SIGNING_PASSWORD")
-    signing.useInMemoryPgpKeys(signingKey, signingPassword)
+    if (signingKey != null && signingPassword != null) {
+        signing.useInMemoryPgpKeys(signingKey, signingPassword)
+    }
 }
 
 indra {
@@ -24,10 +26,6 @@ indra {
     }
 
     configurePublications {
-        if (System.getenv("CI").toBoolean()) {
-            signing.sign(this)
-        }
-
         pom {
             developers {
                 developer {
