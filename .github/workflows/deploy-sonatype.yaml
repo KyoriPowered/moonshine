@@ -30,7 +30,7 @@ jobs:
           java-version: '17'
           distribution: temurin
       - name: Deploy to OSSRH
-        run: ./gradlew publish --no-daemon
+        run: ./gradlew -PforceSign=true publish --no-daemon
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
@@ -38,7 +38,7 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
       - name: Deploy to Central
         if: ${{ github.ref_type == 'tag' }}
-        run: ./gradlew closeAndReleaseSonatypeStagingRepository --no-daemon
+        run: ./gradlew -PforceSign=true closeAndReleaseSonatypeStagingRepository --no-daemon
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
