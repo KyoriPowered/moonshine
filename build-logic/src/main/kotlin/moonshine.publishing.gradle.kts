@@ -4,7 +4,7 @@ plugins {
 
 indra {
     javaVersions {
-        target(16)
+        target(17)
     }
 
     github("KyoriPowered", "moonshine") {
