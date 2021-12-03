@@ -4,5 +4,5 @@ plugins {
 }
 
 group = "net.kyori.moonshine"
-version = "2.0.2-SNAPSHOT"
+version = "2.0.2"
 description = "A localisation library for Java"
