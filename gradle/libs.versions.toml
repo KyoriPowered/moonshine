@@ -34,3 +34,6 @@ testing-api = [
 testing-runtime = [
   "junit-jupiter-engine",
 ]
+
+[plugins]
+indra-publishing-sonatype = { id = "net.kyori.indra.publishing.sonatype", version.ref = "gradle-plugin-indra" }

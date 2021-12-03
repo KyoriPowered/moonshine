@@ -1,5 +1,6 @@
 plugins {
     id("moonshine.publishing")
+    alias(libs.plugins.indra.publishing.sonatype)
 }
 
 group = "net.kyori.moonshine"
