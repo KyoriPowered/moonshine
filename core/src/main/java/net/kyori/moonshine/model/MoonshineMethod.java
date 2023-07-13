@@ -17,16 +17,17 @@
  */
 package net.kyori.moonshine.model;
 
-import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Iterator;
 import net.kyori.moonshine.Moonshine;
+import net.kyori.moonshine.MoonshineChild;
 import net.kyori.moonshine.annotation.Message;
+import net.kyori.moonshine.annotation.MessageSection;
 import net.kyori.moonshine.annotation.meta.ThreadSafe;
 import net.kyori.moonshine.exception.scan.MissingMessageAnnotationException;
 import net.kyori.moonshine.exception.scan.NoReceiverLocatorFoundException;
 import net.kyori.moonshine.exception.scan.UnscannableMethodException;
-import net.kyori.moonshine.message.IMessageSource;
 import net.kyori.moonshine.receiver.IReceiverLocator;
 import net.kyori.moonshine.receiver.IReceiverLocatorResolver;
 import net.kyori.moonshine.util.Weighted;
@@ -40,65 +41,96 @@ import org.checkerframework.dataflow.qual.Pure;
  */
 @ThreadSafe
 public final class MoonshineMethod<R> {
-  /**
-   * The owning/declaring type of this method.
-   */
-  private final TypeToken<?> owner;
-
-  /**
-   * The {@link Method reflected method} of this method.
-   */
+  private final Type owner;
   private final Method reflectMethod;
-
-  /**
-   * The key for the message to pass to a {@link IMessageSource message source}.
-   */
+  private final @Nullable Object messageSectionProxy;
   private final String messageKey;
 
-  /**
-   * The locator for a given receiver of this message.
-   */
-  private final IReceiverLocator<? extends R> receiverLocator;
+  private final @Nullable IReceiverLocator<? extends R> receiverLocator;
 
-  public MoonshineMethod(final Moonshine<R, ?, ?, ?> moonshine, final TypeToken<?> owner, final Method reflectMethod)
+  public MoonshineMethod(
+          final Moonshine<R, ?, ?, ?> moonshine,
+          final Type owner,
+          final ClassLoader proxyClassLoader,
+          final Method reflectMethod,
+          final String sectionFullKey,
+          final char delimiter)
       throws UnscannableMethodException {
     this.owner = owner;
     this.reflectMethod = reflectMethod;
 
-    final Message message = this.findMessageAnnotation();
-    this.messageKey = message.value();
+    final boolean isMessageSection = this.reflectMethod.getReturnType().isAnnotationPresent(MessageSection.class);
 
-    this.receiverLocator = this.findReceiverLocator(moonshine);
+    this.messageKey = this.findMessageKey(sectionFullKey, delimiter, isMessageSection);
+    // todo is IReceiverLocatorResolver needed?
+    this.receiverLocator = isMessageSection ? null : this.findReceiverLocator(moonshine);
+
+    Object messageSectionProxy = null;
+    if (isMessageSection) {
+      messageSectionProxy = new MoonshineChild<>(
+              this.reflectMethod.getGenericReturnType(),
+              proxyClassLoader,
+              moonshine,
+              this.messageKey
+      ).proxy();
+    }
+    this.messageSectionProxy = messageSectionProxy;
   }
 
+  /**
+   * Returns the owning/declaring type of this method.
+   */
   @Pure
-  public TypeToken<?> owner() {
+  public Type owner() {
     return this.owner;
   }
 
+  /**
+   * Returns the {@link Method reflected method} of this method.
+   */
   @Pure
   public Method reflectMethod() {
     return this.reflectMethod;
   }
 
+  /**
+   * Returns the message section proxy if this method is a message section, otherwise null.
+   */
+  public @Nullable Object messageSectionProxy() {
+    return this.messageSectionProxy;
+  }
+
+  /**
+   * The full key of the message. So this includes the parent key parts if it has any.
+   */
   @Pure
   public String messageKey() {
     return this.messageKey;
   }
 
+  /**
+   * The locator for a given receiver of this message.
+   */
   @Pure
-  public IReceiverLocator<? extends R> receiverLocator() {
+  public @Nullable IReceiverLocator<? extends R> receiverLocator() {
     return this.receiverLocator;
   }
 
-  private Message findMessageAnnotation() throws MissingMessageAnnotationException {
+  private String findMessageKey(final String sectionFullKey, final char delimiter, final boolean isMessageSection) throws MissingMessageAnnotationException {
     final @Nullable Message annotation = this.reflectMethod.getAnnotation(Message.class);
+
     //noinspection ConstantConditions -- this is completely not true. It may be null, per its Javadocs.
     if (annotation == null) {
-      throw new MissingMessageAnnotationException(this.owner.getType(), this.reflectMethod);
+      if (isMessageSection) {
+        return sectionFullKey;
+      }
+      throw new MissingMessageAnnotationException(this.owner, this.reflectMethod);
     }
 
-    return annotation;
+    if (isMessageSection) {
+      return sectionFullKey + annotation.value() + delimiter;
+    }
+    return sectionFullKey + annotation.value();
   }
 
   private IReceiverLocator<? extends R> findReceiverLocator(final Moonshine<R, ?, ?, ?> moonshine)
@@ -110,13 +142,13 @@ public final class MoonshineMethod<R> {
       final IReceiverLocatorResolver<? extends R> receiverLocatorResolver =
           receiverLocatorResolverIterator.next().value();
       final @Nullable IReceiverLocator<? extends R> resolvedLocator =
-          receiverLocatorResolver.resolve(this.reflectMethod, this.owner.getType());
+          receiverLocatorResolver.resolve(this.reflectMethod, this.owner);
 
       if (resolvedLocator != null) {
         return resolvedLocator;
       }
     }
 
-    throw new NoReceiverLocatorFoundException(this.owner.getType(), this.reflectMethod);
+    throw new NoReceiverLocatorFoundException(this.owner, this.reflectMethod);
   }
 }

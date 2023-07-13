@@ -17,9 +17,7 @@
  */
 package net.kyori.moonshine;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -159,7 +157,7 @@ public final class MoonshineBuilder {
 
   @NotThreadSafe
   public static final class Resolved<T, R, I, O, F> {
-    private final TypeToken<T> proxiedType;
+    private final Type proxiedType;
     private final NavigableSet<Weighted<? extends IReceiverLocatorResolver<? extends R>>> weightedReceiverLocatorResolvers;
     private final IMessageSource<R, I> messageSource;
     private final IMessageRenderer<R, I, O, F> messageRenderer;
@@ -173,7 +171,7 @@ public final class MoonshineBuilder {
         final IMessageSource<R, I> messageSource, final IMessageRenderer<R, I, O, F> messageRenderer,
         final IMessageSender<R, O> messageSender,
         final IPlaceholderResolverStrategy<R, I, F> placeholderResolverStrategy) {
-      this.proxiedType = proxiedType;
+      this.proxiedType = proxiedType.getType();
       this.weightedReceiverLocatorResolvers = weightedReceiverLocatorResolvers;
       this.messageSource = messageSource;
       this.messageRenderer = messageRenderer;
@@ -227,12 +225,10 @@ public final class MoonshineBuilder {
     @SuppressWarnings("unchecked") // Proxy returns Object; we expect T which is provided in #proxiedType.
     @SideEffectFree
     public T create(final ClassLoader classLoader) throws UnscannableMethodException {
-      final Moonshine<R, I, O, F> moonshine = new Moonshine<>(this.proxiedType, this.placeholderResolverStrategy,
-          this.messageSource, this.messageRenderer, this.messageSender, this.weightedReceiverLocatorResolvers,
-          this.weightedPlaceholderResolvers);
-      return (T) Proxy.newProxyInstance(classLoader,
-          new Class[]{GenericTypeReflector.erase(this.proxiedType.getType())},
-          moonshine.invocationHandler());
+      final Moonshine<R, I, O, F> moonshine = new MoonshineRoot<>(this.proxiedType, classLoader,
+          this.placeholderResolverStrategy, this.messageSource, this.messageRenderer, this.messageSender,
+          this.weightedReceiverLocatorResolvers, this.weightedPlaceholderResolvers);
+      return (T) moonshine.proxy();
     }
   }
 }

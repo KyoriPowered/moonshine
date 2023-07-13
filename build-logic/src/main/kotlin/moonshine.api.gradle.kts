@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
     val libs = (project as ExtensionAware).extensions.getByName("libs") as LibrariesForLibs
-    api(libs.checkerframework)
+    compileOnlyApi(libs.checkerframework)
 
     testImplementation(libs.bundles.testing.api)
     testRuntimeOnly(libs.bundles.testing.runtime)
