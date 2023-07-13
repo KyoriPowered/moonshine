@@ -130,7 +130,7 @@ public final class StandardPlaceholderResolverStrategy<R, I, F> implements
 
             final var resolverResult =
                 placeholderResolver.resolve(continuancePlaceholderName, value, receiver,
-                    moonshineMethod.owner().getType(),
+                    moonshineMethod.owner(),
                     moonshineMethod.reflectMethod(), parameters);
             if (resolverResult == null) {
               // The resolver did not want to resolve this; pass it on.

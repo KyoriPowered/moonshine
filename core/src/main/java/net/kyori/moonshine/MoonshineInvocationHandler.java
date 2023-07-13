@@ -84,6 +84,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     }
 
     final var moonshineMethod = this.moonshine.scannedMethod(method);
+
+    if (moonshineMethod.messageSectionProxy() != null) {
+      return moonshineMethod.messageSectionProxy();
+    }
+
     final R receiver = moonshineMethod.receiverLocator().locate(method, proxy, args);
     final I intermediateMessage = this.moonshine.messageSource().messageOf(receiver, moonshineMethod.messageKey());
     final var resolvedPlaceholders =

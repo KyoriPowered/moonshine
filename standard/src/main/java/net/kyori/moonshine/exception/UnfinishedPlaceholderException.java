@@ -30,7 +30,7 @@ public final class UnfinishedPlaceholderException extends PlaceholderResolvingEx
     super("The placeholder "
         + placeholderName
         + " was unfinished in method: "
-        + ReflectiveUtils.formatMethodName(moonshineMethod.owner().getType(), moonshineMethod.reflectMethod()));
+        + ReflectiveUtils.formatMethodName(moonshineMethod.owner(), moonshineMethod.reflectMethod()));
     this.moonshineMethod = moonshineMethod;
     this.placeholderName = placeholderName;
     this.placeholderValue = placeholderValue;
