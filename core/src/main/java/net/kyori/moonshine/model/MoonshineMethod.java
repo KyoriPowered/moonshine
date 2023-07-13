@@ -72,7 +72,7 @@ public final class MoonshineMethod<R> {
               proxyClassLoader,
               moonshine,
               this.messageKey
-      );
+      ).proxy();
     }
     this.messageSectionProxy = messageSectionProxy;
   }
